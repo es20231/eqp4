@@ -16,57 +16,43 @@ router.get('/protected', requireLogin, (req, res) => {
 
 //cadastro de usuário
 router.post('/signup', (req, res) => {
-  const { name, email, username, password } = req.body
+  const { name, email, username, password } = req.body;
+
   if (!name || !email || !username || !password) {
-    return res.status(422).json({ error: "Por favor, preencha todos os campos." })
+    return res.status(422).json({ error: "Por favor, preencha todos os campos." });
   }
 
-//Erro ao encontrar username já cadastrado
-  User.findOne({ username: username }).then((savedUser) => {
-    if (savedUser) {
-      return res.status(409).json({ error: "Nome de usuário já cadastrado." })
+  // Check if the email or username is already registered
+  User.findOne({ $or: [{ email: email }, { username: username }] }).then((existingUser) => {
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return res.status(409).json({ error: "E-mail já está cadastrado." });
+      } else if (existingUser.username === username) {
+        return res.status(409).json({ error: "Nome de usuário já cadastrado." });
+      }
+    } else {
+      // If email and username are not already registered, proceed with saving the new user
+      bcrypt.hash(password, 12).then((hashedpassword) => {
+        const user = new User({
+          name,
+          email,
+          username,
+          password: hashedpassword,
+        });
+
+        user.save().then((user) => {
+          res.json({ message: "Salvo com sucesso!" });
+        }).catch((err) => {
+          console.log(err);
+        });
+      }).catch((err) => {
+        console.log(err);
+      });
     }
-    bcrypt.hash(password, 12).then(hashedpassword => {
-      const user = new User({
-        name,
-        email,
-        username,
-        password: hashedpassword
-      })
-      user.save().then(user => {
-        res.json({ message: "Salvo com sucesso!" })
-      }).catch(err => {
-        console.log(err)
-      })
-    })
-
-  }).catch(err => {
-    console.log(err)
-  })
-
-//Erro ao encontrar email já cadastrado
-  User.findOne({ email: email }).then((savedUser) => {
-    if (savedUser) {
-      return res.status(409).json({ error: "Email já cadastrado." })
-    }
-    bcrypt.hash(password, 12).then(hashedpassword => {
-      const user = new User({
-        name,
-        email,
-        username,
-        password: hashedpassword
-      })
-      user.save().then(user => {
-        res.json({ message: "Salvo com sucesso!" })
-      }).catch(err => {
-        console.log(err)
-      })
-    })
-
-  }).catch(err => {
-    console.log(err)
-  })
-})
+  }).catch((err) => {
+    console.log(err);
+  });
+});
 
 //Listar usuário
 router.get('/users', (req, res) => {
