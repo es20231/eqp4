@@ -1,8 +1,10 @@
+require('dotenv').config()
+const MONGOURI = process.env.MONGOURI
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const port = 3000;
-const { MONGOURI } = require('./keys')
 
 require("./models/user")
 
