@@ -33,5 +33,43 @@ router.post('/createpost', requireLogin, (req, res) => {
       console.log(err)
     })
 })
+router.get('/meupost',requireLogin,(req,res)=>{
+  Post.find({postedBy:req.user._id})
+  .populate("postedBy","_id name")
+  .then(meupost=>{
+    res.json({meupost})
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+})
+router.put('/like', requireLogin,(req,res)=>{
+  Post.findByIdAndUpdate(req.body.postId,{
+    $push:{likes:req.user._id}
+  },{
+    new:true
+  }).exec((err,result)=>{
+    if(err){
+      return res.status(422).json({error:err})
+    }else{
+      res.json(result)
+    }
+  })
+})
+router.put('/dislike', requireLogin,(req,res)=>{
+  Post.findByIdAndUpdate(req.body.postId,{
+    $pull:{likes:req.user._id}
+  },{
+    new:true
+  }).exec((err,result)=>{
+    if(err){
+      return res.status(422).json({error:err})
+    }else{
+      res.json(result)
+    }
+  })
+})
+
+
 
 module.exports = router
