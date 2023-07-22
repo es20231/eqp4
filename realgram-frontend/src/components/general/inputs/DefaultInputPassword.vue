@@ -1,8 +1,8 @@
 <template>
   <div class="default-input">
-    <span class="input__error" :key="index" v-for="(error, index) in errors">{{
-      error
-    }}</span>
+    <span class="input__error" :key="index" v-for="(error, index) in errors"
+      >* {{ error.$message }}</span
+    >
     <a-input-password
       size="large"
       :value="modelValue"
@@ -13,20 +13,29 @@
 </template>
 
 <script setup lang="ts">
+import { Ref } from "vue";
+
 const emit = defineEmits(["update:modelValue", "change"]);
 
-defineProps({
-  modelValue: {
-    type: String,
-    required: true,
-  },
-  errors: {
-    type: Array,
-  },
-  placeholder: {
-    type: String,
-    default: "",
-  },
+export interface IErrorObject {
+  $propertyPath: string;
+  $property: string;
+  $validator: string;
+  $message: string | Ref<string>;
+  $params: object;
+  $pending: boolean;
+  $response: any;
+  $uid: string;
+}
+
+interface Props {
+  modelValue: string;
+  errors?: IErrorObject[];
+  placeholder?: string;
+}
+
+withDefaults(defineProps<Props>(), {
+  placeholder: "",
 });
 
 function emitChange(event: Event) {
@@ -47,7 +56,7 @@ function emitChange(event: Event) {
   gap: 2px;
 
   .input__error {
-    font-size: 10px;
+    font-size: 11px;
     font-style: italic;
     font-weight: 300;
     color: $placeholder-color;

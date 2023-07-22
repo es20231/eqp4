@@ -18,7 +18,7 @@ defineProps({
 
 .before-auth-card {
   &.--padding-small {
-    padding: 18px 24px 24px 18px;
+    padding: 18px 24px;
   }
   &.--padding-normal {
     padding: 24px 12px 32px 24px;

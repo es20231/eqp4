@@ -18,14 +18,14 @@
         ></DefaultInputPassword>
       </div>
 
-      <a-button
+      <DefaultButton
         size="large"
         shape="round"
         type="primary"
         class="card__login-btn"
         :loading="loginIsLoading"
         @click="handleLoginClick"
-        >Entrar</a-button
+        >Entrar</DefaultButton
       >
 
       <div class="card__divider">
@@ -34,8 +34,10 @@
         <div class="divider__line"></div>
       </div>
 
-      <a-button type="link" @click="$router.push({ name: 'recover-password' })"
-        >Esqueceu a senha?</a-button
+      <DefaultButton
+        type="link"
+        @click="$router.push({ name: 'recover-password' })"
+        >Esqueceu a senha?</DefaultButton
       >
     </BeforeAuthCard>
 
@@ -53,6 +55,7 @@ import BeforeAuthContainer from "@/components/general/containers/BeforeAuthConta
 import BeforeAuthCard from "@/components/general/cards/BeforeAuthCard.vue";
 import DefaultLogo from "@/components/general/icons/DefaultLogo.vue";
 import DefaultInput from "@/components/general/inputs/DefaultInput.vue";
+import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
 
 import { useVuelidate } from "@vuelidate/core";
 import { reactive, ref } from "vue";
