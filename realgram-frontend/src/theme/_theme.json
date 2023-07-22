@@ -1,0 +1,13 @@
+{
+  "token": {
+    "colorPrimary": "#80b0f8",
+    "fontSize": 14,
+    "borderRadius": 2,
+    "wireframe": false
+  },
+  "components": {
+    "Button": {
+      "borderRadius": 12
+    }
+  }
+}

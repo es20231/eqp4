@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import LoginView from "@/components/views/LoginView.vue";
 import RegisterView from "@/components/views/RegisterView.vue";
+import RecoverPasswordView from "@/components/views/RecoverPasswordView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -17,6 +18,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/register",
     name: "register",
     component: RegisterView,
+  },
+  {
+    path: "/recover-password",
+    name: "recover-password",
+    component: RecoverPasswordView,
   },
 ];
 

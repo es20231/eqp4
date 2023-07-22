@@ -1,13 +1,11 @@
 <template>
-  <router-view />
-  <nav>
-    <a-button type="primary" @click="$router.push({ name: 'login' })"
-      >Ir para Login</a-button
-    >
-    <a-button type="primary" danger @click="$router.push({ name: 'register' })"
-      >Ir para Registro</a-button
-    >
-  </nav>
+  <a-config-provider :theme="DefaultTheme">
+    <router-view />
+  </a-config-provider>
 </template>
+
+<script setup lang="ts">
+import DefaultTheme from "@/theme/_theme.json";
+</script>
 
 <style lang="scss"></style>
