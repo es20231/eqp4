@@ -10,6 +10,8 @@ import "@/theme/_global.scss";
 // Ant for Vue
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/reset.css";
+// Remix Icons
+import "remixicon/fonts/remixicon.css";
 
 const app = createApp(App);
 
