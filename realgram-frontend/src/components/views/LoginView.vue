@@ -41,8 +41,8 @@
       >
     </BeforeAuthCard>
 
-    <BeforeAuthCard class="view__register-card" padding="small">
-      <span class="register-card__text">
+    <BeforeAuthCard class="view__footer-card" padding="small">
+      <span class="footer-card__text">
         Não tem uma conta?
         <a @click="$router.push({ name: 'register' })">Cadastre-se</a>
       </span>
@@ -56,12 +56,16 @@ import BeforeAuthCard from "@/components/general/cards/BeforeAuthCard.vue";
 import DefaultLogo from "@/components/general/icons/DefaultLogo.vue";
 import DefaultInput from "@/components/general/inputs/DefaultInput.vue";
 import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
-
-import { useVuelidate } from "@vuelidate/core";
-import { reactive, ref } from "vue";
-import { helpers, required } from "@vuelidate/validators";
-import AuthService from "@/services/AuthService";
 import DefaultInputPassword from "../general/inputs/DefaultInputPassword.vue";
+
+import { reactive, ref } from "vue";
+import { useVuelidate } from "@vuelidate/core";
+import { helpers, required } from "@vuelidate/validators";
+
+import AuthService from "@/services/AuthService";
+
+import SendNotification from "@/utils/SendNotification";
+import router from "@/router";
 
 const loginIsLoading = ref(false);
 const inputData = reactive({
@@ -96,9 +100,25 @@ async function handleLoginClick() {
   await AuthService.login(inputData.email, inputData.password)
     .then((response) => {
       console.log("Login Successful: ", response);
+
+      router.push({ name: "dashboard" });
     })
     .catch((error) => {
       console.log("Login Error: ", error);
+
+      if (error.response) {
+        SendNotification("error", {
+          duration: 3,
+          placement: "bottomRight",
+          message: error.response.data.error,
+        });
+      } else {
+        SendNotification("error", {
+          duration: 3,
+          placement: "bottomRight",
+          message: "Erro interno ao realizar login, tente novamente.",
+        });
+      }
     });
 
   loginIsLoading.value = false;
@@ -123,6 +143,8 @@ async function handleLoginClick() {
     }
 
     .card__input-container {
+      width: 100%;
+
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -159,7 +181,7 @@ async function handleLoginClick() {
     }
   }
 
-  .view__register-card {
+  .view__footer-card {
     width: 35vw;
     max-width: 400px;
 
@@ -167,7 +189,7 @@ async function handleLoginClick() {
     align-items: center;
     justify-content: center;
 
-    .register-card__text {
+    .footer-card__text {
       font-size: 14px;
       font-style: normal;
       font-weight: 400;
