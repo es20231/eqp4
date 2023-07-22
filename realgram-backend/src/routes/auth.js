@@ -123,4 +123,35 @@ router.delete('/users/:userId', (req, res) => {
     });
 });
 
+//recupera os dados do usuário autenticado
+router.get('/profile', (req, res) => {
+  const { authorization } = req.headers;
+
+  if (!authorization) {
+    return res.status(401).json({ error: "Não autorizado" })
+  }
+
+  const token = authorization.split(' ')[1]; // Eliminando 'Bearer '
+
+  const decodedToken = jwt.verify(token, JWT_SECRET ?? '')
+  if (!decodedToken._id) {
+    return res.status(401).json({ error: "Não autorizado" })
+  }
+
+  const id = decodedToken._id
+  User.findById(id)
+    .then(user => {
+      if (user) {
+        const { password, ...loggedUser } = user._doc // Removendo o campo 'password' do objeto 'user'
+        return res.json(loggedUser)
+      } else {
+        return res.status(401).json({ error: "Não autorizado" })
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao buscar usuário:', error.message);
+      return res.status(500).json({ error: "Erro ao buscar usuário" })
+    })
+})
+
 module.exports = router
