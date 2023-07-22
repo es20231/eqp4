@@ -13,7 +13,7 @@ export default {
     username: string,
     password: string
   ) => {
-    return axiosInstance.post("/login", {
+    return axiosInstance.post("/signup", {
       name,
       email,
       username,

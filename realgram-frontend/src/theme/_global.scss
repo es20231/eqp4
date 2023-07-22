@@ -1,3 +1,7 @@
 * {
   font-family: Roboto !important;
 }
+
+:where(.css-dev-only-do-not-override-17aj3u5).ant-notification-notice {
+  width: max-content;
+}
