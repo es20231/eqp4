@@ -4,13 +4,14 @@ const cors = require("cors")
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const port = 8080;
+const port = 3000;
 
 
 require('./models/user')
 require('./models/post')
-app.use(express.json())
+
 app.use(cors())
+app.use(express.json())
 app.use(require('./routes/auth'))
 app.use(require('./routes/post'))
 
@@ -26,7 +27,7 @@ mongoose.connection.on('err', (err) => {
   console.log('Erro ao conectar o Mongo', err)
 })
 
-app.listen(8080, () => {
+app.listen(port, () => {
   console.log(`####### REALGRAM API #######`);
   console.log(`Servidor iniciado na porta: ${port}`);
 })
