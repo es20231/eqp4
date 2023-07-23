@@ -1,7 +1,7 @@
 <template>
   <div class="user-post-table-container">
     <!-- No Images Message -->
-    <div v-if="posts.length > 0" class="no-image-message">
+    <div v-if="posts.length == 0" class="no-image-message">
       <img alt="Sem Imagem" :src="require('@/assets/svg/no-image.svg')" />
       <span>
         Faça uma postagem e compartilhe suas histórias com seus amigos.
