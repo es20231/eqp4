@@ -1,6 +1,6 @@
 export default interface ILibraryImage {
   _id: string;
-  image: string;
+  photo: string;
   createdAt: string;
   updatedAt: string;
 }
