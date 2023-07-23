@@ -1,75 +1,90 @@
-const express = require('express')
-const router = express.Router()
-const mongoose = require('mongoose')
-const requireLogin = require('../middleware/requireLogin')
-const Post = mongoose.model("Post")
+const express = require("express");
+const router = express.Router();
+const mongoose = require("mongoose");
+const requireLogin = require("../middleware/requireLogin");
+const Post = mongoose.model("Post");
 
-
-router.get('/allpost',(req,res) => {
+router.get("/post/get-all", (req, res) => {
   Post.find()
-  .populate("postedBy", "_id name")
-  .then(posts =>{
-    res.json({posts})
-  })
-  .catch(err=>{
-    console.log(err)
-  })
-})
-router.post('/createpost', requireLogin, (req, res) => {
-  const { title, body } = req.body
+    .populate("postedBy", "_id name")
+    .then((posts) => {
+      res.json({ posts });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+router.post("/post/create", requireLogin, (req, res) => {
+  const { title, body } = req.body;
   if (!title || !body) {
-    return res.status(422).json({ error: "Por favor, adicione todos os parametros" })
+    return res
+      .status(422)
+      .json({ error: "Por favor, adicione todos os parametros" });
   }
-  req.user.password = undefined
+  req.user.password = undefined;
   const post = new Post({
     title,
     body,
     postedBy: req.user,
-  })
-  post.save().then(result => {
-      res.json({ post: result })
+  });
+  post
+    .save()
+    .then((result) => {
+      res.json({ post: result });
     })
     .catch((err) => {
-      console.log(err)
+      return res.status(500).json({
+        error: "Erro interno ao criar uma postagem, tente novamente.",
+      });
+    });
+});
+
+router.get("/post/get-current-user-posts", requireLogin, (req, res) => {
+  Post.find({ postedBy: req.user._id })
+    .populate("postedBy", "_id name")
+    .then((meupost) => {
+      res.json({ meupost });
     })
-})
-router.get('/meupost',requireLogin,(req,res)=>{
-  Post.find({postedBy:req.user._id})
-  .populate("postedBy","_id name")
-  .then(meupost=>{
-    res.json({meupost})
-  })
-  .catch(err=>{
-    console.log(err)
-  })
-})
-router.put('/like', requireLogin,(req,res)=>{
-  Post.findByIdAndUpdate(req.body.postId,{
-    $push:{likes:req.user._id}
-  },{
-    new:true
-  }).exec((err,result)=>{
-    if(err){
-      return res.status(422).json({error:err})
-    }else{
-      res.json(result)
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+router.put("/post/like", requireLogin, (req, res) => {
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    {
+      $push: { likes: req.user._id },
+    },
+    {
+      new: true,
     }
-  })
-})
-router.put('/dislike', requireLogin,(req,res)=>{
-  Post.findByIdAndUpdate(req.body.postId,{
-    $pull:{likes:req.user._id}
-  },{
-    new:true
-  }).exec((err,result)=>{
-    if(err){
-      return res.status(422).json({error:err})
-    }else{
-      res.json(result)
+  ).exec((err, result) => {
+    if (err) {
+      return res.status(422).json({ error: err });
+    } else {
+      res.json(result);
     }
-  })
-})
+  });
+});
 
+router.put("/post/dislike", requireLogin, (req, res) => {
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    {
+      $pull: { likes: req.user._id },
+    },
+    {
+      new: true,
+    }
+  ).exec((err, result) => {
+    if (err) {
+      return res.status(422).json({ error: err });
+    } else {
+      res.json(result);
+    }
+  });
+});
 
-
-module.exports = router
+module.exports = router;
