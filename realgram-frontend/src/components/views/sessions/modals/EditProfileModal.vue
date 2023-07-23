@@ -9,7 +9,14 @@
     <div class="modal__content">
       <!-- Edit Image -->
       <div class="content__option-column">
-        <a-avatar :size="120" :src="inputData.profileImage"></a-avatar>
+        <a-avatar
+          :size="120"
+          :src="
+            inputData.profileImage
+              ? inputData.profileImage
+              : require('@/assets/imgs/default-avatar.png')
+          "
+        ></a-avatar>
         <span class="option-row__data">{{ inputData.username }}</span>
 
         <div class="content__option-row --flex">

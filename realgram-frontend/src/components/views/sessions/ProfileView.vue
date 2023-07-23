@@ -56,18 +56,12 @@
       <div class="profile-view__images-container">
         <a-tabs v-model:activeKey="activeTab" centered>
           <a-tab-pane key="library-tab" tab="Biblioteca">
-            <!-- Image Paginated Table -->
-            <div class="image-table">
-              <img
-                :key="item._id"
-                :src="item.image"
-                class="table__img"
-                v-for="item in userData?.library"
-                alt="Imagem da biblioteca do usuário"
-              />
-            </div>
+            <UserLibraryTable :library="[]"></UserLibraryTable>
           </a-tab-pane>
-          <a-tab-pane key="posts-tab" tab="Postagens">Post Tab</a-tab-pane>
+
+          <a-tab-pane key="posts-tab" tab="Postagens">
+            <UserPostsTable :posts="[]"></UserPostsTable>
+          </a-tab-pane>
         </a-tabs>
       </div>
     </div>
@@ -78,6 +72,8 @@
 import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
 import EditProfileModal from "@/components/views/sessions/modals/EditProfileModal.vue";
 import LoadingScreen from "@/components/general/loading/LoadingScreen.vue";
+import UserLibraryTable from "@/components/general/tables/UserLibraryTable.vue";
+import UserPostsTable from "@/components/general/tables/UserPostsTable.vue";
 
 import { ref, reactive, onMounted } from "vue";
 import UserService from "@/services/UserService";
@@ -216,19 +212,6 @@ async function fetchUserData() {
         font-size: 14px;
         font-weight: 400;
       }
-    }
-  }
-
-  .image-table {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-
-    .table__img {
-      width: 270px;
-      height: 320px;
-
-      object-fit: cover;
     }
   }
 }

@@ -63,8 +63,13 @@ const dashboardMenu = ref([
     icon: "ri-search-line",
   },
   {
+    key: "upload-image",
+    name: "Enviar Imagem",
+    icon: "ri-image-add-line",
+  },
+  {
     key: "new-post",
-    name: "Criar",
+    name: "Criar Post",
     icon: "ri-add-box-line",
   },
   {
@@ -95,7 +100,13 @@ function handleMenuClick(event: { item: any; key: string; keyPath: string }) {
         placement: "bottomRight",
         message: "Em construção...",
       });
-
+      break;
+    case "upload-image":
+      SendNotification("info", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Em construção...",
+      });
       break;
     case "new-post":
       SendNotification("info", {
