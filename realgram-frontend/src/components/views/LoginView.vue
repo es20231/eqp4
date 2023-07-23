@@ -103,6 +103,7 @@ async function handleLoginClick() {
       console.log("Login Successful: ", response);
 
       CacheManager.set("__token", response.data.token);
+      CacheManager.set("__user", response.data.data);
 
       router.push({ name: "timeline" });
     })

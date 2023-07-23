@@ -14,3 +14,8 @@
   ).ant-menu-light.ant-menu-root.ant-menu-vertical {
   border-inline-end: none;
 }
+
+// Layou Background White
+:where(.css-dev-only-do-not-override-17aj3u5).ant-layout {
+  background: white;
+}
