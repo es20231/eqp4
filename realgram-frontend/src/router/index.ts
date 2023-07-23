@@ -3,6 +3,7 @@ import LoginView from "@/components/views/LoginView.vue";
 import RegisterView from "@/components/views/RegisterView.vue";
 import RecoverPasswordView from "@/components/views/RecoverPasswordView.vue";
 import DashboardView from "@/components/views/DashboardView.vue";
+import TimelineView from "@/components/views/sessions/TimelineView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -11,7 +12,7 @@ const routes: Array<RouteRecordRaw> = [
     component: LoginView,
   },
   {
-    path: "/",
+    path: "/login",
     name: "login",
     component: LoginView,
   },
@@ -29,6 +30,13 @@ const routes: Array<RouteRecordRaw> = [
     path: "/dashboard",
     name: "dashboard",
     component: DashboardView,
+    children: [
+      {
+        path: "",
+        name: "timeline",
+        component: TimelineView,
+      },
+    ],
   },
 ];
 
