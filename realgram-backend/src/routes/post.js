@@ -66,39 +66,57 @@ router.get("/post/get-current-user-posts", requireLogin, (req, res) => {
 });
 
 router.put("/post/like", requireLogin, (req, res) => {
-  Post.findByIdAndUpdate(
-    req.body.postId,
-    {
-      $push: { likes: req.user._id },
-    },
-    {
-      new: true,
-    }
-  ).exec((err, result) => {
-    if (err) {
-      return res.status(422).json({ error: err });
-    } else {
-      res.json(result);
-    }
-  });
+  const postId = req.body.postID;
+  Post.findOne({ _id: postId })
+    .exec((err, post) => {
+      if (err || !post) {
+        return res.status(422).json({ error: 'Post não encontrado' });
+      }
+
+      const ExisteIndexDeLike = post.likes.findIndex(item => item.toString() === req.user._id.toString());
+
+      if (ExisteIndexDeLike === -1) {
+        post.likes.push(req.user._id);
+      } else {
+        post.likes.splice(ExisteIndexDeLike, 1);
+      }
+
+      post.save((err, updatedPost) => {
+        if (err) {
+          return res.status(422).json({ error: err });
+        } else {
+          res.json(updatedPost);
+        }
+      });
+    });
 });
 
-router.put("/post/dislike", requireLogin, (req, res) => {
-  Post.findByIdAndUpdate(
-    req.body.postId,
-    {
-      $pull: { likes: req.user._id },
-    },
-    {
-      new: true,
-    }
-  ).exec((err, result) => {
-    if (err) {
-      return res.status(422).json({ error: err });
-    } else {
-      res.json(result);
-    }
-  });
+
+router.put('/post/dislike', requireLogin, (req, res) => {
+  const postId = req.body.postId;
+
+  Post.findOne({ _id: postId })
+    .exec((err, post) => {
+      if (err || !post) {
+        return res.status(422).json({ error: 'Post not found.' });
+      }
+
+      const ExisteIndexdeDislike = post.dislikes.findIndex(item => item.toString() === req.user._id.toString());
+
+      if (ExisteIndexdeDislike === -1) {
+        post.dislikes.push(req.user._id);
+      } else {
+        post.dislikes.splice(ExisteIndexdeDislike, 1);
+      }
+
+      post.save((err, updatedPost) => {
+        if (err) {
+          return res.status(422).json({ error: err });
+        } else {
+          res.json(updatedPost);
+        }
+      });
+    });
 });
 
 
