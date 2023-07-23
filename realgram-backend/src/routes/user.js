@@ -50,7 +50,7 @@ router.delete("/user/delete/:userId", requireLogin, (req, res) => {
     });
 });
 
-router.put('follow',requireLogin,(req,res)=>{
+router.put('/user/follow',requireLogin,(req,res)=>{
   User.findByIdAndUpdate(req.body.followId,{
   $push:{seguidores:req.user._id}
   },{
@@ -72,7 +72,7 @@ router.put('follow',requireLogin,(req,res)=>{
   )
 })
 
-router.put('unfollow',requireLogin,(req,res)=>{
+router.put('/user/unfollow',requireLogin,(req,res)=>{
   User.findByIdAndUpdate(req.body.unfollowId,{
   $pull:{followers:req.user._id}
   },{
@@ -94,6 +94,5 @@ router.put('unfollow',requireLogin,(req,res)=>{
   )
 })
 
+module.exports = router;
 
-
-module.exports = router
