@@ -23,4 +23,15 @@ export default {
   logout: () => {
     return axiosInstance.post("/auth/logout");
   },
+  sendRecoverPasswordCode: (email: string) => {
+    return axiosInstance.post("/auth/forgot_password", {
+      email,
+    });
+  },
+  recoverPassword: (token: string, newPassword: string) => {
+    return axiosInstance.post("/auth/change_pass", {
+      token,
+      newPassword,
+    });
+  },
 };

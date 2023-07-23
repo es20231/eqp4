@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import LoginView from "@/components/views/LoginView.vue";
 import RegisterView from "@/components/views/RegisterView.vue";
+import SendRecoverCodeView from "@/components/views/SendRecoverCodeView.vue";
 import RecoverPasswordView from "@/components/views/RecoverPasswordView.vue";
 import DashboardView from "@/components/views/DashboardView.vue";
 import TimelineView from "@/components/views/sessions/TimelineView.vue";
@@ -21,6 +22,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/register",
     name: "register",
     component: RegisterView,
+  },
+  {
+    path: "/send-recover-code",
+    name: "send-recover-code",
+    component: SendRecoverCodeView,
   },
   {
     path: "/recover-password",
