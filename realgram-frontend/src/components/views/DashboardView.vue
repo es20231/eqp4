@@ -58,22 +58,22 @@ const selectedKeys = ref(["/"]);
 const dashboardMenu = ref([
   {
     key: "/",
-    name: "Página Inicial",
+    name: "Página inicial",
     icon: "ri-home-2-line",
   },
   {
     key: "search",
-    name: "Pesquisa",
+    name: "Pesquisar",
     icon: "ri-search-line",
   },
   {
     key: "upload-image",
-    name: "Enviar Imagem",
+    name: "Salvar",
     icon: "ri-image-add-line",
   },
   {
     key: "new-post",
-    name: "Criar Post",
+    name: "Postar",
     icon: "ri-add-box-line",
   },
   {

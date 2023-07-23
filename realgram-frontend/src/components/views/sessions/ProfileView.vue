@@ -58,7 +58,7 @@
           <a-tab-pane
             key="library-tab"
             tab="Biblioteca"
-            v-if="authUser._id == userData._id"
+            v-if="authUser._id == userData?._id"
           >
             <UserLibraryTable :library="[]"></UserLibraryTable>
           </a-tab-pane>
