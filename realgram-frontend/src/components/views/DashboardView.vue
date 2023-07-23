@@ -1,5 +1,5 @@
 <template>
-  <a-layout style="min-height: 100vh">
+  <a-layout style="min-height: 100vh" class="dashboard-view">
     <!-- Side Menu -->
     <a-layout-sider
       collapsible
@@ -37,47 +37,59 @@
 import DefaultLogo from "@/components/general/icons/DefaultLogo.vue";
 import DefaultMenu from "@/components/general/menus/DefaultMenu.vue";
 
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import router from "@/router";
 import SendNotification from "@/utils/SendNotification";
 import AuthService from "@/services/AuthService";
 import CacheManager from "@/utils/CacheManager";
+import IUserData from "@/interfaces/IUserData";
+
+onMounted(() => {
+  selectedKeys.value = [findMenuFromURL()];
+});
 
 const loggoutIsLoading = ref(false);
 const menuCollapsed = ref(false);
-const selectedKeys = ref([0]);
+const selectedKeys = ref(["/"]);
 const dashboardMenu = ref([
   {
+    key: "/",
     name: "Página Inicial",
     icon: "ri-home-2-line",
   },
   {
+    key: "search",
     name: "Pesquisa",
     icon: "ri-search-line",
   },
   {
+    key: "new-post",
     name: "Criar",
     icon: "ri-add-box-line",
   },
   {
+    key: "profile",
     name: "Perfil",
     icon: "ri-user-line",
   },
   {
+    key: "loggout",
     name: "Sair",
     icon: "ri-logout-box-line",
   },
 ]);
 
-function handleMenuClick(event: { item: any; key: number; keyPath: string }) {
+function handleMenuClick(event: { item: any; key: string; keyPath: string }) {
   console.log("Handle Menu Click", event);
   const { key } = event;
+  const currentUser: IUserData = CacheManager.get("__user");
+  console.log("currentUser", currentUser);
 
   switch (key) {
-    case 0:
+    case "/":
       router.push({ name: "timeline" });
       break;
-    case 1:
+    case "search":
       SendNotification("info", {
         duration: 3,
         placement: "bottomRight",
@@ -85,21 +97,22 @@ function handleMenuClick(event: { item: any; key: number; keyPath: string }) {
       });
 
       break;
-    case 2:
+    case "new-post":
       SendNotification("info", {
         duration: 3,
         placement: "bottomRight",
         message: "Em construção...",
       });
       break;
-    case 3:
-      SendNotification("info", {
-        duration: 3,
-        placement: "bottomRight",
-        message: "Em construção...",
+    case "profile":
+      router.push({
+        name: "profile",
+        params: {
+          username: currentUser.username,
+        },
       });
       break;
-    case 4:
+    case "loggout":
       loggoutUser();
       break;
   }
@@ -115,6 +128,7 @@ async function loggoutUser() {
       console.log("Loggout Successful: ", response);
 
       CacheManager.delete("__token");
+      CacheManager.delete("__user");
 
       router.push({ name: "login" });
     })
@@ -138,24 +152,41 @@ async function loggoutUser() {
 
   loggoutIsLoading.value = false;
 }
+
+function findMenuFromURL(): string {
+  const url = window.location.href;
+  const dashboardIndex = url.indexOf("/dashboard/");
+  const subRoute = url
+    .slice(dashboardIndex + "/dashboard/".length)
+    .split("/")[0];
+
+  console.log(url);
+  console.log(dashboardIndex);
+  console.log(subRoute);
+
+  if (subRoute === "") return "/";
+  else return subRoute;
+}
 </script>
 
 <style scoped lang="scss">
-.view__side-menu {
-  .side-menu__container {
-    height: 100%;
+.dashboard-view {
+  .view__side-menu {
+    .side-menu__container {
+      height: 100%;
 
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-
-    border-inline-end: 1px solid rgba(5, 5, 5, 0.06);
-
-    .container__header {
-      padding: 20px;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+
+      border-inline-end: 2px solid rgba(5, 5, 5, 0.08);
+
+      .container__header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     }
   }
 }

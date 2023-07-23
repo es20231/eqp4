@@ -1,6 +1,6 @@
 <template>
   <a-menu class="default-menu">
-    <a-menu-item :key="index" v-for="(item, index) in menuOptions">
+    <a-menu-item :key="item.key" v-for="item in menuOptions">
       <DefaultIcon :name="item.icon" size="25px"></DefaultIcon>
       <span class="menu-item-text">
         {{ item.name }}
@@ -13,6 +13,7 @@
 import DefaultIcon from "@/components/general/icons/DefaultIcon.vue";
 
 interface IMenuItem {
+  key: string;
   icon: string;
   name: string;
 }

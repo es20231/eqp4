@@ -4,6 +4,7 @@ import RegisterView from "@/components/views/RegisterView.vue";
 import RecoverPasswordView from "@/components/views/RecoverPasswordView.vue";
 import DashboardView from "@/components/views/DashboardView.vue";
 import TimelineView from "@/components/views/sessions/TimelineView.vue";
+import ProfileView from "@/components/views/sessions/ProfileView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -35,6 +36,12 @@ const routes: Array<RouteRecordRaw> = [
         path: "",
         name: "timeline",
         component: TimelineView,
+      },
+      {
+        path: "profile/:username",
+        name: "profile",
+        component: ProfileView,
+        props: true,
       },
     ],
   },
