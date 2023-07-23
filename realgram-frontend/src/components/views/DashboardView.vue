@@ -21,6 +21,7 @@
           :collapsed="menuCollapsed"
           :menuOptions="dashboardMenu"
           v-model:selectedKeys="selectedKeys"
+          @click="handleMenuClick"
         >
         </DefaultMenu>
       </div>
@@ -33,12 +34,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import DefaultLogo from "@/components/general/icons/DefaultLogo.vue";
 import DefaultMenu from "@/components/general/menus/DefaultMenu.vue";
 
+import { ref } from "vue";
+import router from "@/router";
+import SendNotification from "@/utils/SendNotification";
+import AuthService from "@/services/AuthService";
+import CacheManager from "@/utils/CacheManager";
+
+const loggoutIsLoading = ref(false);
 const menuCollapsed = ref(false);
-const selectedKeys = ref([]);
+const selectedKeys = ref([0]);
 const dashboardMenu = ref([
   {
     name: "Página Inicial",
@@ -61,6 +68,76 @@ const dashboardMenu = ref([
     icon: "ri-logout-box-line",
   },
 ]);
+
+function handleMenuClick(event: { item: any; key: number; keyPath: string }) {
+  console.log("Handle Menu Click", event);
+  const { key } = event;
+
+  switch (key) {
+    case 0:
+      router.push({ name: "timeline" });
+      break;
+    case 1:
+      SendNotification("info", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Em construção...",
+      });
+
+      break;
+    case 2:
+      SendNotification("info", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Em construção...",
+      });
+      break;
+    case 3:
+      SendNotification("info", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Em construção...",
+      });
+      break;
+    case 4:
+      loggoutUser();
+      break;
+  }
+}
+
+async function loggoutUser() {
+  console.log("Handle Loggout Click");
+
+  loggoutIsLoading.value = true;
+
+  await AuthService.logout()
+    .then((response) => {
+      console.log("Loggout Successful: ", response);
+
+      CacheManager.delete("__token");
+
+      router.push({ name: "login" });
+    })
+    .catch((error) => {
+      console.log("Loggout Error: ", error);
+
+      if (error.response) {
+        SendNotification("error", {
+          duration: 3,
+          placement: "bottomRight",
+          message: error.response.data.error,
+        });
+      } else {
+        SendNotification("error", {
+          duration: 3,
+          placement: "bottomRight",
+          message: "Erro interno ao realizar logout, tente novamente.",
+        });
+      }
+    });
+
+  loggoutIsLoading.value = false;
+}
 </script>
 
 <style scoped lang="scss">

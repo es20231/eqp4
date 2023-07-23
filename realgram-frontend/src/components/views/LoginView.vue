@@ -66,6 +66,7 @@ import AuthService from "@/services/AuthService";
 
 import SendNotification from "@/utils/SendNotification";
 import router from "@/router";
+import CacheManager from "@/utils/CacheManager";
 
 const loginIsLoading = ref(false);
 const inputData = reactive({
@@ -101,7 +102,9 @@ async function handleLoginClick() {
     .then((response) => {
       console.log("Login Successful: ", response);
 
-      router.push({ name: "dashboard" });
+      CacheManager.set("__token", response.data.token);
+
+      router.push({ name: "timeline" });
     })
     .catch((error) => {
       console.log("Login Error: ", error);
