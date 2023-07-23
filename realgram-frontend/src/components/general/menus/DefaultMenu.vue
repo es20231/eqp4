@@ -19,7 +19,7 @@ interface IMenuItem {
 
 interface Props {
   menuOptions: IMenuItem[];
-  collapsed: string;
+  collapsed: boolean;
 }
 
 defineProps<Props>();

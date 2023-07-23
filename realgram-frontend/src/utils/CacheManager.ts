@@ -7,4 +7,7 @@ export default {
     const jsonData = JSON.stringify(data);
     localStorage.setItem(key, jsonData);
   },
+  delete(key: string) {
+    localStorage.removeItem(key);
+  },
 };

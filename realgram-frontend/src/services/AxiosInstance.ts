@@ -12,7 +12,7 @@ axiosInstance.interceptors.request.use((requestConfig) => {
   const token = CacheManager.get("__token");
 
   if (token) {
-    requestConfig.headers["x-access-token"] = token;
+    requestConfig.headers["Authorization"] = token;
   }
   return requestConfig;
 });
