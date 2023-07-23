@@ -64,22 +64,34 @@ router.get("/post/get-current-user-posts", requireLogin, (req, res) => {
       console.log(err);
     });
 });
+router.put('/post/like', requireLogin, (req, res) => {
+const postId = req.body.postId;
+  const userId = req.user._id;
 
-router.put("/post/like", requireLogin, (req, res) => {
-  const postId = req.body.postID;
-  Post.findOne({ _id: postId })
+  Post.findById(postId)
     .exec((err, post) => {
       if (err || !post) {
         return res.status(422).json({ error: 'Post não encontrado' });
       }
 
-      const ExisteIndexDeLike = post.likes.findIndex(item => item.toString() === req.user._id.toString());
+      // Verifica se o usuário já deu dislike anteriormente
+      const ExisteDislikeIndex = post.dislikes.findIndex(item => item.toString() === userId.toString());
 
-      if (ExisteIndexDeLike === -1) {
-        post.likes.push(req.user._id);
-      } else {
-        post.likes.splice(ExisteIndexDeLike, 1);
+      // Se o usuário já deu dislike, remove-o do array de dislikes
+      if (ExisteDislikeIndex !== -1) {
+        post.dislikes.splice(ExisteDislikeIndex, 1);
       }
+
+      // Verifica se o usuário já deu like anteriormente
+      const existelikeIndex = post.likes.findIndex(item => item.toString() === userId.toString());
+
+      // Se o usuário já deu like, não faz nada
+      if (existelikeIndex !== -1) {
+        return res.json(post);
+      }
+
+      // Adiciona o usuário ao array de likes
+      post.likes.push(userId);
 
       post.save((err, updatedPost) => {
         if (err) {
@@ -94,20 +106,31 @@ router.put("/post/like", requireLogin, (req, res) => {
 
 router.put('/post/dislike', requireLogin, (req, res) => {
   const postId = req.body.postId;
-
-  Post.findOne({ _id: postId })
+  const userId = req.user._id;
+  Post.findById(postId)
     .exec((err, post) => {
       if (err || !post) {
-        return res.status(422).json({ error: 'Post not found.' });
+        return res.status(422).json({ error: 'Post não encontrado' });
       }
 
-      const ExisteIndexdeDislike = post.dislikes.findIndex(item => item.toString() === req.user._id.toString());
+      // Verifica se o usuário já deu like anteriormente
+      const existeindexLike = post.likes.findIndex(item => item.toString() === userId.toString());
 
-      if (ExisteIndexdeDislike === -1) {
-        post.dislikes.push(req.user._id);
-      } else {
-        post.dislikes.splice(ExisteIndexdeDislike, 1);
+      // Se o usuário já deu like, remove-o do array de likes
+      if (existeindexLike !== -1) {
+        post.likes.splice(existeindexLike, 1);
       }
+
+      // Verifica se o usuário já deu dislike anteriormente
+      const ExisteDislikeIndex = post.dislikes.findIndex(item => item.toString() === userId.toString());
+
+      // Se o usuário já deu dislike, não faz nada
+      if (ExisteDislikeIndex !== -1) {
+        return res.json(post);
+      }
+
+      // Adiciona o usuário ao array de dislikes
+      post.dislikes.push(userId);
 
       post.save((err, updatedPost) => {
         if (err) {
