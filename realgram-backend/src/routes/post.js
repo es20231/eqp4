@@ -15,8 +15,22 @@ router.get("/post/get-all", (req, res) => {
     });
 });
 
+router.get('/post/get-timeline',requireLogin,(req,res) => {
+  //Se postado por seguindo
+  Post.find({postedBy:{$in:req.user.following}})
+  .populate("postedBy", "_id name")
+  .sort('-createdAt')
+  .then(posts =>{
+    res.json({posts})
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+})
+
 router.post("/post/create", requireLogin, (req, res) => {
   const { title, body } = req.body;
+  
   if (!title || !body) {
     return res
       .status(422)
@@ -86,5 +100,27 @@ router.put("/post/dislike", requireLogin, (req, res) => {
     }
   });
 });
+
+
+router.put('/post/comment', requireLogin,(req,res)=>{
+  const comentario = {
+    text:req.body.text,
+    postedBy: req.user._id
+  }
+  Post.findByIdAndUpdate(req.body.postId,{
+    $push:{comentarios:comentario}
+  },{
+    new:true
+  })
+  .populate("comentarios.postedBy","_id name")
+  .populate("postedBy","_id name")
+  .exec((err,result)=>{
+    if(err){
+      return res.status(422).json({error:err})
+    }else{
+      res.json(result)
+    }
+  })
+})
 
 module.exports = router;
