@@ -1,8 +1,11 @@
 require("dotenv").config();
-import MailerTransporter from "../utils/MailerTransporter";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const MAILER_SENDER_EMAIL = process.env.MAILER_SENDER_EMAIL;
+const MAILER_SENDER_HOST = process.env.MAILER_SENDER_HOST;
+const MAILER_SENDER_PORT = process.env.MAILER_SENDER_PORT;
+const MAILER_SENDER_USER = process.env.MAILER_SENDER_USER;
+const MAILER_SENDER_PASS = process.env.MAILER_SENDER_PASS;
 
 const express = require("express");
 const router = express.Router();
@@ -10,7 +13,16 @@ const mongoose = require("mongoose");
 const User = mongoose.model("User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const requireLogin = require("../middleware/requireLogin");
+const nodemailer = require("nodemailer");
+
+const MailerTransporter = nodemailer.createTransport({
+  host: MAILER_SENDER_HOST,
+  port: MAILER_SENDER_PORT,
+  auth: {
+    user: MAILER_SENDER_USER,
+    pass: MAILER_SENDER_PASS,
+  },
+});
 
 // Register User
 router.post("/auth/register", (req, res) => {
