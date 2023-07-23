@@ -49,3 +49,5 @@ router.delete("/user/delete/:userId", requireLogin, (req, res) => {
       res.status(500).json({ error: "Ocorreu um erro ao remover o usuário." });
     });
 });
+
+module.exports = router;

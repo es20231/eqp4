@@ -1,10 +1,8 @@
 require("dotenv").config();
+import MailerTransporter from "../utils/MailerTransporter";
+
 const JWT_SECRET = process.env.JWT_SECRET;
-const MAILER_SENDER_HOST = process.env.MAILER_SENDER_HOST
-const MAILER_SENDER_PORT = process.env.MAILER_SENDER_PORT
-const MAILER_SENDER_EMAIL = process.env.MAILER_SENDER_EMAIL
-const MAILER_SENDER_USER = process.env.MAILER_SENDER_USER
-const MAILER_SENDER_PASS = process.env.MAILER_SENDER_PASS
+const MAILER_SENDER_EMAIL = process.env.MAILER_SENDER_EMAIL;
 
 const express = require("express");
 const router = express.Router();
@@ -12,7 +10,6 @@ const mongoose = require("mongoose");
 const User = mongoose.model("User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require('nodemailer')
 const requireLogin = require("../middleware/requireLogin");
 
 // Register User
@@ -136,64 +133,60 @@ router.post("/auth/logout", (req, res) => {
 });
 
 //recupera os dados do usuário autenticado
-router.get('/auth/get-user-data', (req, res) => {
+router.get("/auth/get-user-data", (req, res) => {
   const { authorization } = req.headers;
 
   if (!authorization) {
-    return res.status(401).json({ error: "Não autorizado" })
+    return res.status(401).json({ error: "Não autorizado" });
   }
 
-  const token = authorization.split(' ')[1]; // Eliminando 'Bearer '
+  const token = authorization.split(" ")[1]; // Eliminando 'Bearer '
 
-  const decodedToken = jwt.verify(token, JWT_SECRET ?? '')
+  const decodedToken = jwt.verify(token, JWT_SECRET ?? "");
   if (!decodedToken._id) {
-    return res.status(401).json({ error: "Não autorizado" })
+    return res.status(401).json({ error: "Não autorizado" });
   }
 
-  const id = decodedToken._id
+  const id = decodedToken._id;
   User.findById(id)
-    .then(user => {
+    .then((user) => {
       if (user) {
-        const { password, ...loggedUser } = user._doc // Removendo o campo 'password' do objeto 'user'
-        return res.json(loggedUser)
+        const { password, ...loggedUser } = user._doc; // Removendo o campo 'password' do objeto 'user'
+        return res.json(loggedUser);
       } else {
-        return res.status(401).json({ error: "Não autorizado" })
+        return res.status(401).json({ error: "Não autorizado" });
       }
     })
-    .catch(error => {
-      console.error('Erro ao buscar usuário:', error.message);
-      return res.status(500).json({ error: "Erro ao buscar usuário" })
-    })
-})
-
-// Configuração do serviço de email
-const transporter = nodemailer.createTransport({
-  host: MAILER_SENDER_HOST,
-  port: MAILER_SENDER_PORT,
-  auth: {
-    user: MAILER_SENDER_USER,
-    pass: MAILER_SENDER_PASS
-  }
+    .catch((error) => {
+      console.error("Erro ao buscar usuário:", error.message);
+      return res.status(500).json({ error: "Erro ao buscar usuário" });
+    });
 });
 
 // Rota para solicitar a recuperação de senha
-router.post('/forgot_password', (req, res) => {
+router.post("/auth/forgot_password", (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    return res.status(400).json({ error: "Informe o email para recuperar a senha." })
+    return res
+      .status(400)
+      .json({ error: "Informe o email para recuperar a senha." });
   }
 
   User.findOne({ email }) // Verificar se o email está registrado no sistema
-    .then(user => {
+    .then((user) => {
       if (!user) {
-        return res.status(404).json({ error: "Email não encontrado no sistema." })
+        return res
+          .status(404)
+          .json({ error: "Email não encontrado no sistema." });
       }
 
       // Gerar token com prazo de expiração de 1h
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1h' })
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "1h",
+      });
 
-      console.log("token p/ email: " + token) // Token de recuperação no console
+      console.log("token p/ email: " + token); // Token de recuperação no console
 
       // Enviar o token por email para ser usado na próxima etapa
       const mailOptions = {
@@ -202,70 +195,84 @@ router.post('/forgot_password', (req, res) => {
         subject: "Recuperação de Senha",
         text: `Clique no link a seguir para redefinir sua senha: http://localhost:3000/change_pass?token=${token}
                             Caso necessário, copie e cole no navegador
-              `
-      }
+              `,
+      };
 
-      transporter.sendMail(mailOptions, (error, info) => {
+      MailerTransporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          console.error("Erro ao enviar e-mail:", error.message)
-          return res.status(500).json({ error: "Erro ao enviar o e-mail de recuperação de senha." })
+          console.error("Erro ao enviar e-mail:", error.message);
+          return res.status(500).json({
+            error: "Erro ao enviar o e-mail de recuperação de senha.",
+          });
         }
-        console.log("E-mail enviad:", info.response)
-        return res.json({ message: "Solicitação de recuperação de senha enviada com sucesso." })
-      })
-
+        console.log("E-mail enviad:", info.response);
+        return res.json({
+          message: "Solicitação de recuperação de senha enviada com sucesso.",
+        });
+      });
     })
-    .catch(error => {
-      console.error('Erro ao buscar usuário:', error.message);
-      return res.status(500).json({ error: "Erro ao buscar usuário" })
-    })
-})
+    .catch((error) => {
+      console.error("Erro ao buscar usuário:", error.message);
+      return res.status(500).json({ error: "Erro ao buscar usuário" });
+    });
+});
 
 // Rota para alterar senha
-router.post('/change_pass', (req, res) => {
-  const { token, novaSenha } = req.body;
+router.post("/auth/change_pass", (req, res) => {
+  const { token, newPassword } = req.body;
 
-  if (!token || !novaSenha) {
-    return res.status(400).json({ error: "Informe o token e a nova senha para alterar a senha esquecida." })
+  if (!token || !newPassword) {
+    return res.status(400).json({
+      error: "Informe o token e a nova senha para alterar a senha esquecida.",
+    });
   }
 
   try {
     const decodedToken = jwt.verify(token, JWT_SECRET);
     // Verificar se o token é válido e se o ID do usuário está presente
     if (!decodedToken._id) {
-      return res.status(401).json({ error: "Token inválido ou expirado." })
+      return res.status(401).json({ error: "Token inválido ou expirado." });
     }
 
     User.findById(decodedToken._id) // Encontrar o usuário pelo ID
-      .then(user => {
+      .then((user) => {
         if (!user) {
-          return res.status(404).json({ error: "Usuário não encontrado." })
+          return res.status(404).json({ error: "Usuário não encontrado." });
         }
-        bcrypt.hash(novaSenha, 12) // Criptografar a nova senha
-          .then(hashedPassword => {
+        bcrypt
+          .hash(newPassword, 12) // Criptografar a nova senha
+          .then((hashedPassword) => {
             user.password = hashedPassword; // Atualizar a senha criptografada do usuário
-            user.save()
+            user
+              .save()
               .then(() => {
-                return res.json({ message: "Senha alterada com sucesso." })
+                return res.json({ message: "Senha alterada com sucesso." });
               })
-              .catch(error => {
-                console.error('Erro ao salvar a senha atualizada:', error.message);
-                return res.status(500).json({ error: "Erro ao salvar a senha atualizada." })
-              })
+              .catch((error) => {
+                console.error(
+                  "Erro ao salvar a senha atualizada:",
+                  error.message
+                );
+                return res
+                  .status(500)
+                  .json({ error: "Erro ao salvar a senha atualizada." });
+              });
           })
-          .catch(error => {
-            console.error('Erro ao criptografar a nova senha:', error.message);
-            return res.status(500).json({ error: "Erro ao criptografar a nova senha." })
-          })
+          .catch((error) => {
+            console.error("Erro ao criptografar a nova senha:", error.message);
+            return res
+              .status(500)
+              .json({ error: "Erro ao criptografar a nova senha." });
+          });
       })
-      .catch(error => {
-        console.error('Erro ao buscar usuário:', error.message);
-        return res.status(500).json({ error: "Erro ao buscar usuário." })
-      })
+      .catch((error) => {
+        console.error("Erro ao buscar usuário:", error.message);
+        return res.status(500).json({ error: "Erro ao buscar usuário." });
+      });
   } catch (error) {
-    console.error('Erro ao verificar o token:', error.message);
-    return res.status(401).json({ error: "Token inválido ou expirado." })
+    console.error("Erro ao verificar o token:", error.message);
+    return res.status(401).json({ error: "Token inválido ou expirado." });
   }
-})
+});
 
-module.exports = router
+module.exports = router;
