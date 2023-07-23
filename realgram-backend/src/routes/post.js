@@ -64,6 +64,7 @@ router.get("/post/get-current-user-posts", requireLogin, (req, res) => {
       console.log(err);
     });
 });
+//versão atualizada do like
 router.put('/post/like', requireLogin, (req, res) => {
 const postId = req.body.postId;
   const userId = req.user._id;
@@ -103,7 +104,7 @@ const postId = req.body.postId;
     });
 });
 
-//Versão atualizada
+//Versão atualizada do dislike
 router.put('/post/dislike', requireLogin, (req, res) => {
   const postId = req.body.postId;
   const userId = req.user._id;
