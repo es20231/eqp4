@@ -13,10 +13,15 @@ const postSchemma = new mongoose.Schema({
     type: String,
     default: 'no photo',
   },
+  likes:[{type:ObjectId,ref:"User"}],
+  comentarios:[{
+    text:String,
+    postedBy:{type:ObjectId,ref:"User"}
+  }],
   postedBy: {
     type: ObjectId,
     ref: 'User',
   },
-})
+},{timestamps:true})
 
 mongoose.model('Post', postSchemma)
