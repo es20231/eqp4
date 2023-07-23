@@ -29,6 +29,9 @@
     <!-- Main -->
     <a-layout>
       <router-view />
+
+      <!-- Search Drawer -->
+      <SearchDrawer v-model:open="searchDrawer.visible" />
     </a-layout>
   </a-layout>
 </template>
@@ -36,8 +39,9 @@
 <script setup lang="ts">
 import DefaultLogo from "@/components/general/icons/DefaultLogo.vue";
 import DefaultMenu from "@/components/general/menus/DefaultMenu.vue";
+import SearchDrawer from "@/components/general/drawers/SearchDrawer.vue";
 
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import router from "@/router";
 import SendNotification from "@/utils/SendNotification";
 import AuthService from "@/services/AuthService";
@@ -83,23 +87,26 @@ const dashboardMenu = ref([
     icon: "ri-logout-box-line",
   },
 ]);
+const searchDrawer = reactive({
+  visible: false,
+  open: () => {
+    searchDrawer.visible = true;
+  },
+  close: () => {
+    searchDrawer.visible = false;
+  },
+});
 
 function handleMenuClick(event: { item: any; key: string; keyPath: string }) {
-  console.log("Handle Menu Click", event);
   const { key } = event;
   const currentUser: IUserData = CacheManager.get("__user");
-  console.log("currentUser", currentUser);
 
   switch (key) {
     case "/":
       router.push({ name: "timeline" });
       break;
     case "search":
-      SendNotification("info", {
-        duration: 3,
-        placement: "bottomRight",
-        message: "Em construção...",
-      });
+      searchDrawer.open();
       break;
     case "upload-image":
       SendNotification("info", {

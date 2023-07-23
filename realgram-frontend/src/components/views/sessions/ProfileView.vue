@@ -55,7 +55,11 @@
 
       <div class="profile-view__images-container">
         <a-tabs v-model:activeKey="activeTab" centered>
-          <a-tab-pane key="library-tab" tab="Biblioteca">
+          <a-tab-pane
+            key="library-tab"
+            tab="Biblioteca"
+            v-if="authUser._id == userData._id"
+          >
             <UserLibraryTable :library="[]"></UserLibraryTable>
           </a-tab-pane>
 
@@ -75,9 +79,10 @@ import LoadingScreen from "@/components/general/loading/LoadingScreen.vue";
 import UserLibraryTable from "@/components/general/tables/UserLibraryTable.vue";
 import UserPostsTable from "@/components/general/tables/UserPostsTable.vue";
 
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import UserService from "@/services/UserService";
 import SendNotification from "@/utils/SendNotification";
+import CacheManager from "@/utils/CacheManager";
 
 interface Props {
   username: string;
@@ -85,10 +90,11 @@ interface Props {
 
 const props = defineProps<Props>();
 
-onMounted(() => {
-  fetchUserData();
+onMounted(async () => {
+  await fetchUserData();
 });
 
+const authUser = ref(CacheManager.get("__user"));
 const userIsLoading = ref(false);
 const userData = ref<any>();
 const activeTab = ref<string>("library-tab");
@@ -100,6 +106,10 @@ const editUserModal = reactive({
   close: () => {
     editUserModal.visible = false;
   },
+});
+
+watch(props, () => {
+  fetchUserData();
 });
 
 async function fetchUserData() {
