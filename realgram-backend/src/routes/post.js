@@ -103,7 +103,7 @@ const postId = req.body.postId;
     });
 });
 
-
+//Versão atualizada
 router.put('/post/dislike', requireLogin, (req, res) => {
   const postId = req.body.postId;
   const userId = req.user._id;
