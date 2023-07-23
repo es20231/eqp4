@@ -97,7 +97,7 @@ onMounted(async () => {
 const authUser = ref(CacheManager.get("__user"));
 const userIsLoading = ref(false);
 const userData = ref<any>();
-const activeTab = ref<string>("library-tab");
+const activeTab = ref<string>("posts-tab");
 const editUserModal = reactive({
   visible: false,
   open: () => {
