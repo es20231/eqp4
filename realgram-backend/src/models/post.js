@@ -14,6 +14,7 @@ const postSchemma = new mongoose.Schema({
     default: 'no photo',
   },
   likes:[{type:ObjectId,ref:"User"}],
+  dislikes:[{type:ObjectId,ref:"User"}],
   comentarios:[{
     text:String,
     postedBy:{type:ObjectId,ref:"User"}

@@ -64,41 +64,83 @@ router.get("/post/get-current-user-posts", requireLogin, (req, res) => {
       console.log(err);
     });
 });
+//versão atualizada do like
+router.put('/post/like', requireLogin, (req, res) => {
+const postId = req.body.postId;
+  const userId = req.user._id;
 
-router.put("/post/like", requireLogin, (req, res) => {
-  Post.findByIdAndUpdate(
-    req.body.postId,
-    {
-      $push: { likes: req.user._id },
-    },
-    {
-      new: true,
-    }
-  ).exec((err, result) => {
-    if (err) {
-      return res.status(422).json({ error: err });
-    } else {
-      res.json(result);
-    }
-  });
+  Post.findById(postId)
+    .exec((err, post) => {
+      if (err || !post) {
+        return res.status(422).json({ error: 'Post não encontrado' });
+      }
+
+      
+      const ExisteDislikeIndex = post.dislikes.findIndex(item => item.toString() === userId.toString());
+
+      
+      if (ExisteDislikeIndex !== -1) {
+        post.dislikes.splice(ExisteDislikeIndex, 1);
+      }
+
+      
+      const existelikeIndex = post.likes.findIndex(item => item.toString() === userId.toString());
+
+     
+      if (existelikeIndex !== -1) {
+        return res.json(post);
+      }
+
+      
+      post.likes.push(userId);
+
+      post.save((err, updatedPost) => {
+        if (err) {
+          return res.status(422).json({ error: err });
+        } else {
+          res.json(updatedPost);
+        }
+      });
+    });
 });
 
-router.put("/post/dislike", requireLogin, (req, res) => {
-  Post.findByIdAndUpdate(
-    req.body.postId,
-    {
-      $pull: { likes: req.user._id },
-    },
-    {
-      new: true,
-    }
-  ).exec((err, result) => {
-    if (err) {
-      return res.status(422).json({ error: err });
-    } else {
-      res.json(result);
-    }
-  });
+//Versão atualizada do dislike
+router.put('/post/dislike', requireLogin, (req, res) => {
+  const postId = req.body.postId;
+  const userId = req.user._id;
+  Post.findById(postId)
+    .exec((err, post) => {
+      if (err || !post) {
+        return res.status(422).json({ error: 'Post não encontrado' });
+      }
+
+      
+      const existeindexLike = post.likes.findIndex(item => item.toString() === userId.toString());
+
+      
+      if (existeindexLike !== -1) {
+        post.likes.splice(existeindexLike, 1);
+      }
+
+     
+      const ExisteDislikeIndex = post.dislikes.findIndex(item => item.toString() === userId.toString());
+
+      
+      if (ExisteDislikeIndex !== -1) {
+        return res.json(post);
+      }
+
+      
+      post.dislikes.push(userId);
+
+      post.save((err, updatedPost) => {
+        if (err) {
+          return res.status(422).json({ error: err });
+        } else {
+          res.json(updatedPost);
+        }
+      });
+    });
 });
 
 
