@@ -15,6 +15,15 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer')
 const requireLogin = require("../middleware/requireLogin");
 
+// Configuração do serviço de email
+const MailerTransporter = nodemailer.createTransport({
+  host: MAILER_SENDER_HOST,
+  auth: {
+    user: MAILER_SENDER_USER,
+    pass: MAILER_SENDER_PASS,
+  }
+});
+
 // Register User
 router.post("/auth/register", (req, res) => {
   const { name, email, username, password } = req.body;
@@ -166,17 +175,8 @@ router.get('/auth/get-user-data', (req, res) => {
     })
 })
 
-// Configuração do serviço de email
-const transporter = nodemailer.createTransport({
-  host: MAILER_SENDER_HOST,
-  auth: {
-    user: MAILER_SENDER_USER,
-    pass: MAILER_SENDER_PASS,
-  }
-});
-
 // Rota para solicitar a recuperação de senha
-router.post('/forgot_password', (req, res) => {
+router.post('/auth/forgot_password', (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -204,7 +204,7 @@ router.post('/forgot_password', (req, res) => {
               `
       }
 
-      transporter.sendMail(mailOptions, (error, info) => {
+      MailerTransporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error("Erro ao enviar e-mail:", error.message)
           return res.status(500).json({ error: "Erro ao enviar o e-mail de recuperação de senha." })
@@ -221,10 +221,10 @@ router.post('/forgot_password', (req, res) => {
 })
 
 // Rota para alterar senha
-router.post('/change_pass', (req, res) => {
-  const { token, novaSenha } = req.body;
+router.post('/auth/change_pass', (req, res) => {
+  const { token, newPassword } = req.body;
 
-  if (!token || !novaSenha) {
+  if (!token || !newPassword) {
     return res.status(400).json({ error: "Informe o token e a nova senha para alterar a senha esquecida." })
   }
 
@@ -240,7 +240,7 @@ router.post('/change_pass', (req, res) => {
         if (!user) {
           return res.status(404).json({ error: "Usuário não encontrado." })
         }
-        bcrypt.hash(novaSenha, 12) // Criptografar a nova senha
+        bcrypt.hash(newPassword, 12) // Criptografar a nova senha
           .then(hashedPassword => {
             user.password = hashedPassword; // Atualizar a senha criptografada do usuário
             user.save()
