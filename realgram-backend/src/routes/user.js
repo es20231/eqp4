@@ -64,6 +64,50 @@ router.delete("/user/delete/:userId", requireLogin, (req, res) => {
     });
 });
 
+// Rota para editar o perfil do usuário
+router.put('/user/edit-current-user-profile/:userId', requireLogin, async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    // Obter o usuário a ser editado
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    // Atualizar os campos de acordo com os dados fornecidos na requisição
+    if (req.body.name) {
+      user.name = req.body.name;
+    }
+
+    if (req.body.description) {
+      user.description = req.body.description;
+    }
+
+    if (req.body.profilePhoto) {
+      // Salvar a URL da imagem no campo profilePhoto
+      user.profilePhoto = req.body.profilePhoto;
+    } else if (req.body.removeProfilePhoto) {
+      // Remover a imagem de perfil (caso removeProfilePhoto seja verdadeiro)
+      user.profilePhoto = '';
+    }
+
+    // Salvar as alterações no banco de dados
+    const updatedUser = await user.save();
+
+    res.json({ message: 'Perfil atualizado com sucesso.', user: updatedUser });
+  } catch (error) {
+    // Verificando se o erro é relacionado ao campo profilePhoto
+    if (error.errors && error.errors.profilePhoto) {
+      return res.status(422).json({ error: "URL de imagem inválida" });
+    }
+
+    console.error('Erro ao editar perfil:', error);
+    return res.status(500).json({ error: 'Erro ao editar perfil.' });
+  }
+});
+
 router.put("/user/follow", requireLogin, async (req, res) => {
   const { followId } = req.body;
   const { user } = req;
