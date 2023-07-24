@@ -8,7 +8,7 @@ const requireLogin = require("../middleware/requireLogin");
 // Configurando o armazenamento do multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/user_images');
+    cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname);
