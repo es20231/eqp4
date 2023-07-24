@@ -7,7 +7,7 @@ export default interface IUserData {
   email: string;
   username: string;
   description: string;
-  profileImage?: string;
+  profilePhoto: File | string;
   posts?: IUserPost[];
   library?: ILibraryImage[];
   followers?: string[];
