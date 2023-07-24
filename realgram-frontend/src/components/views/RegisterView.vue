@@ -23,6 +23,11 @@
           v-model="inputData.username"
           :errors="v$.username.$errors"
           @keypress.enter="handleRegisterClick"
+          @change="
+            inputData.username = $event
+              .toLocaleLowerCase()
+              .replace(/[^a-zA-Z0-9]/g, '')
+          "
         ></DefaultInput>
 
         <DefaultInputPassword
