@@ -87,7 +87,6 @@ import LoadingScreen from "@/components/general/loading/LoadingScreen.vue";
 import UserLibraryTable from "@/components/general/tables/UserLibraryTable.vue";
 import UserPostsTable from "@/components/general/tables/UserPostsTable.vue";
 
-import { Modal } from "ant-design-vue";
 import { ref, reactive, onMounted, watch, computed } from "vue";
 import IUserData from "@/interfaces/IUserData";
 import UserService from "@/services/UserService";
