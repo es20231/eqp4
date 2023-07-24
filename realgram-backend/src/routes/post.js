@@ -28,7 +28,7 @@ router.get('/post/get-timeline',requireLogin,(req,res) => {
   })
 })
 
-router.post("/post/create", requireLogin, (req, res) => {
+router.post("/post/create", requireLogin,upload.single("image"), (req, res) => {
   const { title, body } = req.body;
   
   if (!title || !body) {
@@ -36,10 +36,16 @@ router.post("/post/create", requireLogin, (req, res) => {
       .status(422)
       .json({ error: "Por favor, adicione todos os parametros" });
   }
+  if(!req.file){
+    return res.status(400).json({error: "Por favor, selecione uma imagem para postar"});
+  }
+  const photo = req.file.filename;
+
   req.user.password = undefined;
   const post = new Post({
     title,
     body,
+    photo,
     postedBy: req.user,
   });
   post
