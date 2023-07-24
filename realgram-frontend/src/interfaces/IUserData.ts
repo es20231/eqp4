@@ -10,8 +10,8 @@ export default interface IUserData {
   profileImage?: string;
   posts?: IUserPost[];
   library?: ILibraryImage[];
-  followers?: IUserData[];
-  following?: IUserData[];
+  followers?: string[];
+  following?: string[];
   createdAt: string;
   updatedAt: string;
 }

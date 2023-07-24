@@ -5,6 +5,8 @@ export default interface IUserPost {
   title: string;
   body: string;
   photo: string;
+  likes: string[];
+  dislikes: string[];
   postedBy: IUserData;
   createdAt: string;
   updatedAt: string;

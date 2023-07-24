@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const requireLogin = require("../middleware/requireLogin");
+const { log } = require("console");
 const User = mongoose.model("User");
 
 // Get User By Username
@@ -50,49 +51,63 @@ router.delete("/user/delete/:userId", requireLogin, (req, res) => {
     });
 });
 
-router.put('/user/follow',requireLogin,(req,res)=>{
-  User.findByIdAndUpdate(req.body.followId,{
-  $push:{seguidores:req.user._id}
-  },{
-    new:true
-  },(err,result) =>{
-    if(err){
-      return res.status(422).json({error:err})
-    }
-    User.findByIdAndUpdate(req.user._id,{
-      $push:{following:req.body.followId}
+router.put("/user/follow", requireLogin, async (req, res) => {
+  const { followId } = req.body;
+  const { user } = req;
 
-    },{new:true}).select("-password").then(result=>{
-      res.json(result)
-    }).catch(err=>{
-      return res.status(422).json({error:err})
-    })
-  
+  try {
+    // Added Auth User to Params User Followers List
+    const updatedUser = await User.findByIdAndUpdate(
+      followId,
+      {
+        $push: { followers: user._id },
+      },
+      {
+        new: true,
+      }
+    );
+
+    // Added Params User to Auth User Following List
+    const updatedLoggedInUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        $push: { following: followId },
+      },
+      { new: true }
+    ).select("-password");
+
+    res.json(updatedLoggedInUser);
+  } catch (err) {
+    return res.status(422).json({ error: err.message });
   }
-  )
-})
+});
 
-router.put('/user/unfollow',requireLogin,(req,res)=>{
-  User.findByIdAndUpdate(req.body.unfollowId,{
-  $pull:{followers:req.user._id}
-  },{
-    new:true
-  },(err,result) =>{
-    if(err){
-      return res.status(422).json({error:err})
-    }
-    User.findByIdAndUpdate(req.user._id,{
-      $pull:{seguindo:req.body.unfollowId}
+router.put("/user/unfollow", requireLogin, async (req, res) => {
+  try {
+    // Remove Auth User from Params User Followers List
+    const updatedUser = await User.findByIdAndUpdate(
+      req.body.unfollowId,
+      {
+        $pull: { followers: req.user._id },
+      },
+      {
+        new: true,
+      }
+    );
 
-    },{new:true}).select("-password").then(result=>{
-      res.json(result)
-    }).catch(err=>{
-      return res.status(422).json({error:err})
-    })
-  
+    // Remove Params User from Auth User Following List
+    const updatedLoggedInUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $pull: { following: req.body.unfollowId },
+      },
+      { new: true }
+    ).select("-password");
+
+    res.json(updatedLoggedInUser);
+  } catch (err) {
+    return res.status(422).json({ error: err.message });
   }
-  )
-})
+});
 
 module.exports = router;
-
