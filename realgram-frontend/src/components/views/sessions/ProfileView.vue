@@ -26,9 +26,21 @@
         />
         <div class="header__content">
           <div class="content__row">
+            <!-- User @ -->
             <span class="content__username"> {{ userData?.username }} </span>
-            <DefaultButton @click="editUserModal.open()"
+            <!-- Edit Profile -->
+            <DefaultButton v-if="isAuthProfile" @click="editUserModal.open()"
               >Editar perfil</DefaultButton
+            >
+            <!-- Follow/Unfollow -->
+            <DefaultButton
+              v-if="!isAuthProfile"
+              :loading="followIsLoading"
+              @click="handleFollowClick"
+              :type="authFollowThisUser == true ? 'default' : 'primary'"
+              >{{
+                authFollowThisUser == true ? "Seguindo" : "Seguir"
+              }}</DefaultButton
             >
           </div>
 
@@ -55,11 +67,7 @@
 
       <div class="profile-view__images-container">
         <a-tabs v-model:activeKey="activeTab" centered>
-          <a-tab-pane
-            key="library-tab"
-            tab="Biblioteca"
-            v-if="authUser._id == userData?._id"
-          >
+          <a-tab-pane key="library-tab" tab="Biblioteca" v-if="isAuthProfile">
             <UserLibraryTable :library="[]"></UserLibraryTable>
           </a-tab-pane>
 
@@ -79,10 +87,12 @@ import LoadingScreen from "@/components/general/loading/LoadingScreen.vue";
 import UserLibraryTable from "@/components/general/tables/UserLibraryTable.vue";
 import UserPostsTable from "@/components/general/tables/UserPostsTable.vue";
 
-import { ref, reactive, onMounted, watch } from "vue";
+import { Modal } from "ant-design-vue";
+import { ref, reactive, onMounted, watch, computed } from "vue";
+import IUserData from "@/interfaces/IUserData";
 import UserService from "@/services/UserService";
-import SendNotification from "@/utils/SendNotification";
 import CacheManager from "@/utils/CacheManager";
+import SendNotification from "@/utils/SendNotification";
 
 interface Props {
   username: string;
@@ -94,10 +104,31 @@ onMounted(async () => {
   await fetchUserData();
 });
 
-const authUser = ref(CacheManager.get("__user"));
-const userIsLoading = ref(false);
 const userData = ref<any>();
+const userIsLoading = ref(true);
+const followIsLoading = ref(false);
 const activeTab = ref<string>("posts-tab");
+
+const authUser = computed((): IUserData => {
+  return CacheManager.get("__user");
+});
+const isAuthProfile = computed((): boolean => {
+  return authUser.value?._id == userData.value?._id;
+});
+const authFollowThisUser = computed(() => {
+  let follow = false;
+
+  console.log("Calcul follow this user");
+  console.log("Auth User", authUser.value);
+  console.log("Profile User", userData.value);
+
+  userData.value?.followers?.forEach((follower: string) => {
+    if (follower == authUser.value._id) follow = true;
+  });
+
+  return follow;
+});
+
 const editUserModal = reactive({
   visible: false,
   open: () => {
@@ -112,9 +143,63 @@ watch(props, () => {
   fetchUserData();
 });
 
-async function fetchUserData() {
-  userIsLoading.value = true;
+function handleFollowClick() {
+  console.log("Handle Follow Click", authFollowThisUser.value);
 
+  if (authFollowThisUser.value == false) {
+    followUser();
+  } else {
+    unfollowUser();
+  }
+}
+
+async function followUser() {
+  followIsLoading.value = true;
+
+  const userID = userData.value._id;
+  await UserService.followUser(userID)
+    .then((response) => {
+      console.log("Follow User", response);
+
+      fetchUserData();
+    })
+    .catch((error) => {
+      console.log("Follow User Error", error);
+
+      SendNotification("error", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Erro interno ao seguir usuário, tente novamente",
+      });
+    });
+
+  followIsLoading.value = false;
+}
+
+async function unfollowUser() {
+  followIsLoading.value = true;
+
+  const userID = userData.value._id;
+  await UserService.unfollowUser(userID)
+    .then((response) => {
+      console.log("Unfollow User", response);
+
+      fetchUserData();
+    })
+    .catch((error) => {
+      console.log("Unfollow User Error", error);
+
+      SendNotification("error", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Erro interno ao desseguir usuário, tente novamente",
+      });
+    });
+
+  followIsLoading.value = false;
+}
+
+async function fetchUserData() {
   await UserService.getUserByUsername(props.username)
     .then((response) => {
       console.log("Fetch User Data", response);
