@@ -1,5 +1,13 @@
 <template>
   <a-layout style="min-height: 100vh" class="dashboard-view">
+    <!-- Modals -->
+    <UploadLibraryModal v-model:open="uploadImageModal.visible" />
+    <!-- Drawer -->
+    <SearchDrawer
+      @close="searchDrawer.close()"
+      v-model:open="searchDrawer.visible"
+    />
+
     <!-- Side Menu -->
     <a-layout-sider
       collapsible
@@ -29,12 +37,6 @@
     <!-- Main -->
     <a-layout>
       <router-view @showSearchDrawer="searchDrawer.open()" />
-
-      <!-- Search Drawer -->
-      <SearchDrawer
-        @close="searchDrawer.close()"
-        v-model:open="searchDrawer.visible"
-      />
     </a-layout>
   </a-layout>
 </template>
@@ -50,6 +52,7 @@ import SendNotification from "@/utils/SendNotification";
 import AuthService from "@/services/AuthService";
 import CacheManager from "@/utils/CacheManager";
 import IUserData from "@/interfaces/IUserData";
+import UploadLibraryModal from "./sessions/modals/UploadLibraryModal.vue";
 
 onMounted(() => {
   selectedKeys.value = [findMenuFromURL()];
@@ -99,6 +102,15 @@ const searchDrawer = reactive({
     searchDrawer.visible = false;
   },
 });
+const uploadImageModal = reactive({
+  visible: false,
+  open: () => {
+    uploadImageModal.visible = true;
+  },
+  close: () => {
+    uploadImageModal.visible = false;
+  },
+});
 
 function handleMenuClick(event: { item: any; key: string; keyPath: string }) {
   const { key } = event;
@@ -112,11 +124,7 @@ function handleMenuClick(event: { item: any; key: string; keyPath: string }) {
       searchDrawer.open();
       break;
     case "upload-image":
-      SendNotification("info", {
-        duration: 3,
-        placement: "bottomRight",
-        message: "Em construção...",
-      });
+      uploadImageModal.open();
       break;
     case "new-post":
       SendNotification("info", {
