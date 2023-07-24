@@ -27,7 +27,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 // Rota para salvar imagem
-router.post('/save-image', upload.single('image'),requireLogin, async(req, res) => {
+router.post('/library/save-image', upload.single('image'),requireLogin, async(req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Por favor, selecione uma imagem para salvar.' });
   }
@@ -47,7 +47,7 @@ router.post('/save-image', upload.single('image'),requireLogin, async(req, res) 
   }
 });
 
-router.delete('/remove-image/:id', requireLogin,(req, res) => {
+router.delete('/library/delete-image/:id', requireLogin,(req, res) => {
   const imageId = req.params.id;
 
   UserImage.findByIdAndDelete(imageId, (err, deletedImage) => {
