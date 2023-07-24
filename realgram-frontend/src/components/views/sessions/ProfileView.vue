@@ -20,8 +20,8 @@
           alt="Foto do usuário"
           class="header__user-image"
           :src="
-            userData?.profileImage
-              ? userData.profileImage
+            userData?.profilePhoto
+              ? 'http://localhost:3000/uploads/' + userData.profilePhoto
               : require('@/assets/imgs/default-avatar.png')
           "
         />
