@@ -5,7 +5,7 @@
     okText="Salvar"
     @ok="handleSaveImageClick"
     class="upload-library-modal"
-    :loading="saveImageIsLoading"
+    :confirm-loading="saveImageIsLoading"
     title="Salvar imagem na biblioteca"
   >
     <div class="modal__content">
@@ -56,8 +56,6 @@ import SendNotification from "@/utils/SendNotification";
 import LibraryService from "@/services/LibraryService";
 
 const emit = defineEmits(["close"]);
-
-declare var URL: any;
 
 const fileList = ref<any>([]);
 const saveImageIsLoading = ref<boolean>(false);
