@@ -2,25 +2,38 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const requireLogin = require("../middleware/requireLogin");
-const { log } = require("console");
 const User = mongoose.model("User");
+const Post = mongoose.model("Post");
 
 // Get User By Username
-router.get("/user/get-by-username/:username", requireLogin, (req, res) => {
-  const username = req.params.username;
+router.get(
+  "/user/get-by-username/:username",
+  requireLogin,
+  async (req, res) => {
+    const username = req.params.username;
 
-  User.findOne({ username: username })
-    .then((user) => {
+    try {
+      // Encontrar o usuário pelo username
+      const user = await User.findOne({ username: username });
+
       if (!user) {
         return res.status(404).json({ error: "Usuário não encontrado." });
       }
-      res.json(user);
-    })
-    .catch((err) => {
+
+      // Encontrar os posts do usuário usando a função populate
+      const posts = await Post.find({ postedBy: user._id });
+
+      // Retornar o usuário com os posts como atributo
+      res.json({
+        ...user._doc,
+        posts,
+      });
+    } catch (err) {
       console.log(err);
       res.status(500).json({ error: "Ocorreu um erro ao buscar o usuário." });
-    });
-});
+    }
+  }
+);
 
 // User List
 router.get("/user/get-all", requireLogin, (req, res) => {
