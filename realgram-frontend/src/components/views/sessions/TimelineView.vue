@@ -13,7 +13,7 @@
         size="large"
         shape="round"
         type="primary"
-        @click="handleStartPostClick"
+        @click="$emit('showSearchDrawer')"
         >Comece agora mesmo</DefaultButton
       >
     </div>
@@ -22,15 +22,6 @@
 
 <script setup lang="ts">
 import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
-
-import { ref } from "vue";
-
-const showSearchSidebar = ref(false);
-function handleStartPostClick() {
-  console.log("Handle Start Post Click");
-
-  showSearchSidebar.value = true;
-}
 </script>
 
 <style scoped lang="scss">

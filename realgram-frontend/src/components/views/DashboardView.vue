@@ -28,10 +28,13 @@
     </a-layout-sider>
     <!-- Main -->
     <a-layout>
-      <router-view />
+      <router-view @showSearchDrawer="searchDrawer.open()" />
 
       <!-- Search Drawer -->
-      <SearchDrawer v-model:open="searchDrawer.visible" />
+      <SearchDrawer
+        @close="searchDrawer.close()"
+        v-model:open="searchDrawer.visible"
+      />
     </a-layout>
   </a-layout>
 </template>

@@ -46,6 +46,8 @@ import UserService from "@/services/UserService";
 import SendNotification from "@/utils/SendNotification";
 import { useRouter } from "vue-router";
 
+const emit = defineEmits(["close"]);
+
 onMounted(() => {
   fetchUserList();
 });
@@ -69,6 +71,9 @@ const filteredList = computed(() => {
 
 function handleUserClick(user: IUserData) {
   console.log("Handle Search User Click");
+
+  emit("close");
+
   router.push({
     name: "profile",
     params: {
