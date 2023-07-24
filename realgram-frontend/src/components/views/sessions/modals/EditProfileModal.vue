@@ -113,7 +113,9 @@ const vuelidateRules = {
 const v$ = useVuelidate(vuelidateRules, inputData);
 
 const profilePhotoURL = computed(() => {
-  if (inputData.profilePhoto) {
+  if (typeof inputData.profilePhoto === "string") {
+    return "http://localhost:3000/uploads/" + inputData.profilePhoto;
+  } else if (inputData.profilePhoto instanceof File) {
     return URL.createObjectURL(inputData.profilePhoto);
   }
   return "";
@@ -173,11 +175,10 @@ async function handleSaveUserData() {
     inputData.id,
     inputData.name,
     inputData.description,
-    inputData.profilePhoto,
-    inputData.profilePhoto != ""
+    inputData.profilePhoto
   )
     .then((response) => {
-      console.log("Recover Successful: ", response);
+      console.log("Save User Data Successful: ", response);
 
       SendNotification("success", {
         duration: 3,
@@ -188,7 +189,7 @@ async function handleSaveUserData() {
       emit("update");
     })
     .catch((error) => {
-      console.log("Recover Error: ", error);
+      console.log("Save User Data Error: ", error);
 
       if (error.response) {
         SendNotification("error", {
@@ -200,7 +201,8 @@ async function handleSaveUserData() {
         SendNotification("error", {
           duration: 3,
           placement: "bottomRight",
-          message: "Erro interno ao alterar sua senha, tente novamente.",
+          message:
+            "Erro interno ao alterar os dados do seu perfil, tente novamente.",
         });
       }
     });
