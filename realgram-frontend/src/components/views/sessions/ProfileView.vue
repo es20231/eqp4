@@ -9,6 +9,7 @@
       v-if="editUserModal.visible"
       @close="editUserModal.close()"
       @cancel="editUserModal.close()"
+      @update="editUserModal.update()"
       v-model:open="editUserModal.visible"
     />
 
@@ -135,6 +136,10 @@ const editUserModal = reactive({
   },
   close: () => {
     editUserModal.visible = false;
+  },
+  update: () => {
+    editUserModal.close();
+    fetchUserData();
   },
 });
 
