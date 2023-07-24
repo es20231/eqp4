@@ -5,16 +5,17 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const port = 3000;
+const multer = require("multer");
 
 require("./models/user");
 require("./models/post");
-
+require("./models/library");
 app.use(cors());
 app.use(express.json());
 app.use(require("./routes/auth"));
 app.use(require("./routes/post"));
 app.use(require("./routes/user"));
-
+app.use(require("./routes/library"));
 mongoose.connect(MONGOURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,

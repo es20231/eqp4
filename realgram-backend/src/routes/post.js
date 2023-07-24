@@ -3,6 +3,26 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const requireLogin = require("../middleware/requireLogin");
 const Post = mongoose.model("Post");
+const multer = require("multer");
+
+// Configurando o armazenamento do multer para postagem(linha 42)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/user_images');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  },
+});
+// Filtro para permitir apenas imagens
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('O arquivo enviado não é uma imagem!'), false);
+  }
+};
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 router.get("/post/get-all", (req, res) => {
   Post.find()
