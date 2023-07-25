@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const UserImage = require('../models/library.js');
 const multer = require('multer');
+const requireLogin = require("../middleware/requireLogin");
+
 
 // Configurando o armazenamento do multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/user_images');
+    cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname);
@@ -25,7 +27,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 // Rota para salvar imagem
-router.post('/save-image', upload.single('image'), (req, res) => {
+router.post('/library/save-image', upload.single('image'),requireLogin, async(req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Por favor, selecione uma imagem para salvar.' });
   }
@@ -33,19 +35,19 @@ router.post('/save-image', upload.single('image'), (req, res) => {
   const fileName = req.file.filename;
   const newImage = new UserImage({
     fileName: fileName,
+    uploadedBy: req.user._id,
   });
 
-  newImage.save((err) => {
-    if (err) {
-      console.error('Erro ao salvar a imagem no banco de dados:', err);
-      return res.status(500).json({ error: 'Erro ao salvar a imagem no banco de dados' });
-    }
-
+  try {
+    await newImage.save();
     return res.json({ message: 'Imagem salva com sucesso' });
-  });
+  } catch (err) {
+    console.error('Erro ao salvar a imagem no banco de dados:', err);
+    return res.status(500).json({ error: 'Erro ao salvar a imagem no banco de dados' });
+  }
 });
 
-router.delete('/remove-image/:id', (req, res) => {
+router.delete('/library/delete-image/:id', requireLogin,(req, res) => {
   const imageId = req.params.id;
 
   UserImage.findByIdAndDelete(imageId, (err, deletedImage) => {
@@ -61,5 +63,7 @@ router.delete('/remove-image/:id', (req, res) => {
     return res.json({ message: 'Imagem removida com sucesso' });
   });
 });
+
+
 
 module.exports = router;
