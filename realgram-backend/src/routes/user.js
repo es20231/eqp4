@@ -4,6 +4,33 @@ const mongoose = require("mongoose");
 const requireLogin = require("../middleware/requireLogin");
 const User = mongoose.model("User");
 const Post = mongoose.model("Post");
+const multer = require('multer');
+const fs = require('fs')
+
+// Configurando o multer para o upload de imagens
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads/")
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + file.originalname);
+  },
+});
+
+// Filtrar apenas imagens .jpg e .png
+const imageFilter = function (req, file, cb) {
+  if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+    return cb(('Somente imagens .jpg, .jpeg e .png são permitidas!'), false);
+  }
+  cb(null, true);
+};
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limite de 10MB para o tamanho do arquivo
+  fileFilter: imageFilter, // Aplicar o filtro personalizado para imagens
+}).single('profilePhoto');
+
 
 // Get User By Username
 router.get(
@@ -65,34 +92,38 @@ router.delete("/user/delete/:userId", requireLogin, (req, res) => {
 });
 
 // Rota para editar o perfil do usuário
-router.put('/user/edit-current-user-profile/:userId', requireLogin, async (req, res) => {
+router.put('/user/edit-current-user-profile/:userId', requireLogin, upload, async (req, res) => {
   const userId = req.params.userId;
 
   try {
-    // Obter o usuário a ser editado
     const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado.' });
     }
-
     // Atualizar os campos de acordo com os dados fornecidos na requisição
     if (req.body.name) {
       user.name = req.body.name;
     }
-
     if (req.body.description) {
       user.description = req.body.description;
     }
-
-    if (req.body.profilePhoto) {
-      // Salvar a URL da imagem no campo profilePhoto
-      user.profilePhoto = req.body.profilePhoto;
-    } else if (req.body.removeProfilePhoto) {
-      // Remover a imagem de perfil (caso removeProfilePhoto seja verdadeiro)
-      user.profilePhoto = '';
+    // Se houver um arquivo de imagem enviado, atualizar o campo "profilePhoto"
+    if (req.file) {
+      // Primeiro, vamos remover a imagem anterior se ela existir
+      if (user.profilePhoto) {
+        fs.unlinkSync('./uploads/' + user.profilePhoto); // Remover a imagem do diretório
+      }
+      user.profilePhoto = req.file.filename; // Atualizar o campo com o novo caminho da imagem
     }
-
+    // Verificar se a opção para remover a foto de perfil foi marcada
+    if (req.body.removeProfilePhoto) {
+      // Primeiro, vamos remover a imagem atual se ela existir
+      if (user.profilePhoto) {
+        fs.unlinkSync('./uploads/' + user.profilePhoto); // Remover a imagem do diretório
+      }
+      user.profilePhoto = ''; // Atualizar o campo para vazio, removendo a imagem do banco de dados
+    }
     // Salvar as alterações no banco de dados
     const updatedUser = await user.save();
 
@@ -102,7 +133,6 @@ router.put('/user/edit-current-user-profile/:userId', requireLogin, async (req, 
     if (error.errors && error.errors.profilePhoto) {
       return res.status(422).json({ error: "URL de imagem inválida" });
     }
-
     console.error('Erro ao editar perfil:', error);
     return res.status(500).json({ error: 'Erro ao editar perfil.' });
   }
