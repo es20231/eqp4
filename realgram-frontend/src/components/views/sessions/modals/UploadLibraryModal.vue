@@ -11,7 +11,7 @@
     <div class="modal__content">
       <a-upload-dragger
         :height="300"
-        accept="image/"
+        accept="image/*"
         name="library-file"
         :showUploadList="false"
         :customRequest="handleSelect"
@@ -65,7 +65,7 @@ const selectedImage = computed((): File => {
 });
 
 const selectedImageUrl = computed(() => {
-  if (selectedImage.value) {
+  if (selectedImage.value instanceof File) {
     return URL.createObjectURL(selectedImage.value);
   }
   return "";
@@ -76,7 +76,8 @@ function handleRemoveImageClick() {
 }
 
 function handleSelect(event: any) {
-  console.log("handleSelect");
+  console.log("handleSelect", event);
+  console.log("file List", fileList.value);
 
   const maxSizeInBytes = 10 * 1024 * 1024;
   const file: File = event.file;
@@ -123,6 +124,13 @@ async function handleSaveImageClick() {
     .then((response) => {
       console.log("Save Image in Library Successful: ", response);
 
+      SendNotification("success", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Imagem adicionada na sua biblioteca com sucesso!",
+      });
+
+      window.location.reload();
       emit("close");
     })
     .catch((error) => {
@@ -156,6 +164,7 @@ async function handleSaveImageClick() {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    position: relative;
 
     .content__upload-dragger {
       width: 100%;
@@ -174,20 +183,24 @@ async function handleSaveImageClick() {
       }
 
       .dragger__selected-img {
-        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         img {
-          width: 100%;
+          max-width: 65%;
           max-height: 270px;
           object-fit: contain;
         }
-
-        .selected-img__remove-btn {
-          position: absolute;
-          right: 15px;
-          bottom: 0px;
-        }
       }
+    }
+
+    .selected-img__remove-btn {
+      position: absolute;
+      right: 15px;
+      bottom: 10px;
     }
   }
 }
