@@ -15,7 +15,7 @@ app.use(require("./routes/auth"));
 app.use(require("./routes/post"));
 app.use(require("./routes/user"));
 
-mongoose.connect(MONGOURI, {
+mongoose.connect('mongodb+srv://realgram:HD2p9wdgrbSpb6wl@google-cloud-sp-realgra.4le4qef.mongodb.net/?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -31,3 +31,5 @@ app.listen(port, () => {
   console.log(`####### REALGRAM API #######`);
   console.log(`Servidor iniciado na porta: ${port}`);
 });
+
+module.exports = app;

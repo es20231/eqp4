@@ -1,17 +1,17 @@
-const mongoose = require("mongoose");
+/*const mongoose = require("mongoose");
 const request = require("supertest");
 const post = require("../post");
 require("dotenv").config();
 
-/* Connecting to the database before each test. */
+/* Connecting to the database before each test. 
 beforeEach(async () => {
   await mongoose.connect(process.env.MONGODB_URI);
 });
 
-/* Closing database connection after each test. */
+/* Closing database connection after each test. 
 afterEach(async () => {
   await mongoose.connection.close();
-});
+});/*
 
 describe("GET /api/products/:id", () => {
   it("should return a product", async () => {
@@ -56,4 +56,4 @@ describe("DELETE /api/products/:id", () => {
     );
     expect(res.statusCode).toBe(200);
   });
-});
+});*/

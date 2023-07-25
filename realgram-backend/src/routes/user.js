@@ -36,7 +36,7 @@ router.get(
 );
 
 // User List
-router.get("/user/get-all", requireLogin, (req, res) => {
+router.get("/user/get-all", (req, res) => {
   User.find()
     .then((users) => {
       res.json(users);
