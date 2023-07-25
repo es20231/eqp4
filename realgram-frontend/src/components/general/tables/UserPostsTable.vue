@@ -4,17 +4,22 @@
     <div v-if="posts.length == 0" class="no-image-message">
       <img alt="Sem Imagem" :src="require('@/assets/svg/no-image.svg')" />
       <span>
-        Faça uma postagem e compartilhe suas histórias com seus amigos.
+        {{
+          isAuthUserProfile
+            ? "Faça uma postagem e compartilhe suas histórias com seus amigos."
+            : "Ainda não há nenhuma publicação."
+        }}
       </span>
     </div>
+
     <!-- Image Paginated Table -->
     <div class="image-table" v-else>
       <img
-        :key="post._id"
-        :src="post.photo"
+        :key="item._id"
         class="table__img"
-        v-for="post in posts"
-        alt="Postagens do usuário"
+        v-for="item in posts"
+        alt="Imagem do post do usuário"
+        :src="'http://localhost:3000/uploads/' + item.photo"
       />
     </div>
   </div>
@@ -25,6 +30,7 @@ import IUserPost from "@/interfaces/IUserPost";
 
 interface Props {
   posts: IUserPost[];
+  isAuthUserProfile: boolean;
 }
 
 defineProps<Props>();
@@ -64,10 +70,10 @@ defineProps<Props>();
     gap: 4px;
 
     .table__img {
-      width: 270px;
+      width: 100%;
       height: 320px;
 
-      object-fit: cover;
+      object-fit: revert;
     }
   }
 }

@@ -31,3 +31,5 @@ app.listen(port, () => {
   console.log(`####### REALGRAM API #######`);
   console.log(`Servidor iniciado na porta: ${port}`);
 });
+
+module.exports = app
