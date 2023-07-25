@@ -32,6 +32,13 @@ const data = {
     "email": "lpauloval@gmail.com",
     "password": "paulo1234"
 };
+const res = await supertest(app)
+  .post('/auth/register')
+  .send(data);
+    // Use the supertest variable to make the request
+    expect(res.statusCode).toBe(201);
+  });
+});
 
 describe("GET /auth/register usuário vazio", () => {  
   test("should return users", async () => {
@@ -42,6 +49,13 @@ const data = {
     "email": "",
     "password": ""
 };
+const res = await supertest(app)
+  .post('/auth/register')
+  .send(data);
+    // Use the supertest variable to make the request
+    expect(res.statusCode).toBe(400);
+  });
+});
 
 describe("GET /auth/register usuário que já existe", () => {  
   test("should return users", async () => {
@@ -57,11 +71,11 @@ const res = await supertest(app)
   .post('/auth/register')
   .send(data);
     // Use the supertest variable to make the request
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(409);
   });
 });
 
-describe("GET /auth/login usuário vazio", () => {  
+describe("GET /auth/login usuário válido", () => {  
   test("should return users", async () => {
 const data = {
     "email": "lpauloval@gmail.com",
@@ -87,7 +101,7 @@ const res = await supertest(app)
   .post('/auth/login')
   .send(data);
     // Use the supertest variable to make the request
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(422);
   });
 });
 
@@ -102,7 +116,7 @@ const res = await supertest(app)
   .post('/auth/login')
   .send(data);
     // Use the supertest variable to make the request
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(422);
   });
 });
 
@@ -117,6 +131,6 @@ const res = await supertest(app)
   .post('/auth/login')
   .send(data);
     // Use the supertest variable to make the request
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(400);
   });
 });
