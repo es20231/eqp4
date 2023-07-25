@@ -84,14 +84,11 @@ router.delete("/user/delete/:userId", requireLogin, (req, res) => {
 
   User.findByIdAndRemove(userId)
     .then((deletedUser) => {
-      if (!deletedUser) {
-        return res.status(404).json({ error: "Usuário não encontrado." });
-      }
       res.status(200).json({ message: "Usuário removido com sucesso." });
     })
     .catch((err) => {
       console.log(err);
-      res.status(500).json({ error: "Ocorreu um erro ao remover o usuário." });
+      return res.status(404).json({ error: "Usuário não encontrado." });
     });
 });
 
