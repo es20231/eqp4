@@ -1,5 +1,5 @@
 <template>
-  <div class="user-library-table-container">
+  <div class="user-library-table-container" id="scroll">
     <!-- No Images Message -->
     <div v-if="library.length == 0" class="no-image-message">
       <img alt="Sem Imagem" :src="require('@/assets/svg/no-image.svg')" />
@@ -7,12 +7,12 @@
     </div>
 
     <!-- Image Paginated Table -->
-    <div class="image-table" v-else>
+    <div class="image-table">
       <img
         :key="item._id"
-        :src="item.photo"
+        :src="'http://localhost:3000/uploads/' + item.fileName"
         class="table__img"
-        v-for="item in library"
+        v-for="item in library.slice(0, displayedImagesCount)"
         alt="Imagem da biblioteca do usuário"
       />
     </div>
@@ -20,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
 import ILibraryImage from "@/interfaces/ILibraryImage";
 
 interface Props {
@@ -27,6 +28,27 @@ interface Props {
 }
 
 defineProps<Props>();
+
+onMounted(() => {
+  window.addEventListener("scroll", () => {
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+
+    // Verifica se o usuário chegou ao final da página
+    if (scrollY + windowHeight >= documentHeight) {
+      loadMoreImages();
+    }
+  });
+});
+
+const imagesPerPage = 9;
+const displayedImagesCount = ref(imagesPerPage);
+
+// Função para carregar mais imagens
+const loadMoreImages = () => {
+  displayedImagesCount.value += imagesPerPage;
+};
 </script>
 
 <style scoped lang="scss">
@@ -63,10 +85,10 @@ defineProps<Props>();
     gap: 4px;
 
     .table__img {
-      width: 270px;
+      width: 100%;
       height: 320px;
 
-      object-fit: cover;
+      object-fit: revert;
     }
   }
 }

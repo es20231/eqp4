@@ -1,7 +1,10 @@
 <template>
   <a-layout style="min-height: 100vh" class="dashboard-view">
     <!-- Modals -->
-    <UploadLibraryModal v-model:open="uploadImageModal.visible" />
+    <UploadLibraryModal
+      v-model:open="uploadImageModal.visible"
+      @close="uploadImageModal.close()"
+    />
     <!-- Drawer -->
     <SearchDrawer
       @close="searchDrawer.close()"
@@ -35,7 +38,10 @@
       </div>
     </a-layout-sider>
     <!-- Main -->
-    <a-layout>
+    <a-layout
+      class="view__main-content"
+      :class="[{ '--collapsed': menuCollapsed }]"
+    >
       <router-view @showSearchDrawer="searchDrawer.open()" />
     </a-layout>
   </a-layout>
@@ -74,13 +80,8 @@ const dashboardMenu = ref([
   },
   {
     key: "upload-image",
-    name: "Salvar",
-    icon: "ri-image-add-line",
-  },
-  {
-    key: "new-post",
-    name: "Postar",
-    icon: "ri-add-box-line",
+    name: "Criar",
+    icon: "ri-add-circle-line",
   },
   {
     key: "profile",
@@ -201,6 +202,9 @@ function findMenuFromURL(): string {
 <style scoped lang="scss">
 .dashboard-view {
   .view__side-menu {
+    position: fixed;
+    height: 100%;
+
     .side-menu__container {
       height: 100%;
 
@@ -216,6 +220,15 @@ function findMenuFromURL(): string {
         align-items: center;
         justify-content: center;
       }
+    }
+  }
+
+  .view__main-content {
+    padding-left: 280px;
+    transition: padding 0.3s ease;
+
+    &.--collapsed {
+      padding-left: 80px;
     }
   }
 }
