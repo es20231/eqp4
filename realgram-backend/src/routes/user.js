@@ -79,17 +79,23 @@ router.get("/user/get-all", requireLogin, (req, res) => {
 });
 
 // Delete User
-router.delete("/user/delete/:userId", requireLogin, (req, res) => {
-  const userId = req.params.userId;
+router.delete("/user/delete/:id", requireLogin, async (req, res) => {
+  try {
+    const userId = req.params.id;
 
-  User.findByIdAndRemove(userId)
-    .then((deletedUser) => {
-      res.status(200).json({ message: "Usuário removido com sucesso." });
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(404).json({ error: "Usuário não encontrado." });
-    });
+    // Encontrar e deletar o usuário pelo ID
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    res.json({ message: "Usuário deletado com sucesso", user: deletedUser });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Erro ao deletar usuário", error: err.message });
+  }
 });
 
 // Rota para editar o perfil do usuário
