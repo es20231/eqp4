@@ -111,9 +111,9 @@ describe("GET /auth/login usuário vazio", () => {
 });
 
 describe("GET /user/delete", () => {
-  test("should alert for invalid id", async () => {
+  test("should show alert for user not found", async () => {
     const res = await supertest(app)
-      .delete(`/user/delete/${"invalidID"}`)
+      .delete(`/user/delete/${"64c0772e267b376b69e439a6"}`)
       .set("Authorization", `Bearer ${sessionToken}`);
     expect(res.statusCode).toBe(404);
   });
@@ -123,7 +123,6 @@ describe("GET /user/delete", () => {
     const res = await supertest(app)
       .delete(deleteRoute)
       .set("Authorization", `Bearer ${sessionToken}`);
-    console.log("############## AQUI MANO", res);
     expect(res.statusCode).toBe(200);
   });
 });
