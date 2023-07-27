@@ -21,7 +21,7 @@
           class="header__user-image"
           :src="
             userData?.profilePhoto
-              ? 'http://localhost:3000/uploads/' + userData.profilePhoto
+              ? apiRootURL + '/uploads/' + userData.profilePhoto
               : require('@/assets/imgs/default-avatar.png')
           "
         />
@@ -116,6 +116,7 @@ const userData = ref<any>();
 const userIsLoading = ref(true);
 const followIsLoading = ref(false);
 const activeTab = ref<string>("library-tab");
+const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
 
 const authUser = computed((): IUserData => {
   return CacheManager.get("__user");

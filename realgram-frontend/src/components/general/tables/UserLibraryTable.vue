@@ -10,7 +10,7 @@
     <div class="image-table">
       <img
         :key="item._id"
-        :src="'http://localhost:3000/uploads/' + item.fileName"
+        :src="apiRootURL + '/uploads/' + item.fileName"
         class="table__img"
         v-for="item in library.slice(0, displayedImagesCount)"
         alt="Imagem da biblioteca do usuário"
@@ -44,8 +44,9 @@ onMounted(() => {
 
 const imagesPerPage = 9;
 const displayedImagesCount = ref(imagesPerPage);
+const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
 
-// Função para carregar mais imagens
+// Function to load more images
 const loadMoreImages = () => {
   displayedImagesCount.value += imagesPerPage;
 };

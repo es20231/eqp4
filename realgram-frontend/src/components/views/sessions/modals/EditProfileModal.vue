@@ -91,8 +91,10 @@ onMounted(() => {
   inputData.profilePhoto = props.userData.profilePhoto;
 });
 
-const imageInputRef = ref<HTMLInputElement | null>(null);
 const saveImageIsLoading = ref(false);
+const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
+const imageInputRef = ref<HTMLInputElement | null>(null);
+
 const inputData = reactive<any>({
   id: "",
   name: "",
@@ -114,7 +116,7 @@ const v$ = useVuelidate(vuelidateRules, inputData);
 
 const profilePhotoURL = computed(() => {
   if (typeof inputData.profilePhoto === "string") {
-    return "http://localhost:3000/uploads/" + inputData.profilePhoto;
+    return apiRootURL.value + "/uploads/" + inputData.profilePhoto;
   } else if (inputData.profilePhoto instanceof File) {
     return URL.createObjectURL(inputData.profilePhoto);
   }
