@@ -31,9 +31,9 @@ mongoose.connection.on("err", (err) => {
   console.log("Erro ao conectar o Mongo", err);
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`####### REALGRAM API #######`);
   console.log(`Servidor iniciado na porta: ${port}`);
 });
 
-module.exports = app
+module.exports = { app, server };
