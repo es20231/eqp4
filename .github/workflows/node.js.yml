@@ -1,37 +1,36 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Node.js CI
+name: Main CI/CD Workflow
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  build:
-
+  build-and-deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x]
-        
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: cd ./realgram-backend
-    - run: npm install
-    - run: npm run test
-    - run: npm run serve
-    - run: cd ../realgram-frontend
-    - run: npm install
-    - run: npm run build
-    - run: npm run start
-    
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Build and deploy the frontend project
+      - name: Build and Deploy Frontend
+        working-directory: ./realgram-frontend
+        run: |
+          # Coloque os comandos para instalar as dependências e build do Vue.js aqui
+          npm install
+          npm run build
+          npm run start
+
+      # Build and deploy the backend project
+      - name: Build and Deploy Backend
+        working-directory: ./realgram-backend
+        run: |
+          # Coloque os comandos para instalar as dependências e build do Node.js aqui
+          npm install
+          # Você pode executar testes aqui se desejar
+          npm run test
+          npm run server
