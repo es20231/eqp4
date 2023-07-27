@@ -1,20 +1,19 @@
 require("dotenv").config();
 const supertest = require("supertest");
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-const app = require("../server.js");
+const { app, server } = require("../../src/server");
 const MONGOURI = process.env.MONGOURI;
 let userTestID = "";
 let sessionToken = "";
 
-beforeAll(async () => {
-  await mongoose.connect(MONGOURI).catch((error) => {
+beforeAll(() => {
+  mongoose.connect(MONGOURI).catch((error) => {
     console.error("Error connecting to MongoDB:", error);
   });
 });
 
-afterAll(async () => {
-  await mongoose.connection.close();
+afterAll(() => {
+  mongoose.connection.close();
 });
 
 describe("GET /auth/register usuário valido", () => {
@@ -125,4 +124,8 @@ describe("GET /user/delete", () => {
       .set("Authorization", `Bearer ${sessionToken}`);
     expect(res.statusCode).toBe(200);
   });
+});
+
+afterAll(() => {
+  server.close();
 });
