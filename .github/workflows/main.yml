@@ -12,9 +12,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Set Vercel Environment Variable
-        run: echo "VERCEL=1" >> $GITHUB_ENV
-
       - name: Checkout repository
         uses: actions/checkout@v3
 

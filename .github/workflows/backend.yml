@@ -29,7 +29,11 @@ jobs:
           npm install
           npm test
 
+      - name: Set Vercel Environment Variable
+        run: echo "VERCEL=1" >> $GITHUB_ENV
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          args: --confirm
