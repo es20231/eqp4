@@ -2,18 +2,21 @@
   "version": 2,
   "builds": [
     {
-      "src": "./realgram-frontend/dist/**",
-      "use": "@vercel/static"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
     {
       "src": "/(.*.(js|css|png|jpg|jpeg|gif|svg|json|woff|woff2))",
-      "dest": "/$1"
+      "dest": "/dist/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "./realgram-frontend/dist/$1"
+      "dest": "/index.html"
     }
   ]
 }
