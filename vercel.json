@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "realgram-backend/src/server.js",
+      "src": "./realgram-backend/src/server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "realgram-backend/src/server.js"
+      "dest": "./realgram-backend/src/server.js"
     }
   ]
 }
