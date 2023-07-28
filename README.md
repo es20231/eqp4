@@ -26,6 +26,7 @@
 ## 📖 Documentação
 
 - [Plano de Iterações](./docs/Plano%20de%20Itera%C3%A7%C3%B5es/Grupo-04-Plano-de-Itera%C3%A7%C3%B5es.pdf)
+- [Plano de Testes](./docs/Plano%20de%20Iterações/Grupo-04-Plano-de-Iterações.pdf)
 - [Tutorial das Ferramentas](./docs/Tutoriais/Tutorial%20Completo%20-%20Grupo%2004.pdf)
 - [Especificação de Requisitos de Software - ERSw](./docs/ERSw/E.S.%20II%20-%20Eqp.%2004%20-%20Especifica%C3%A7%C3%B5es.pdf)
 
@@ -46,6 +47,16 @@ git clone https://github.com/es20231/eqp4.git
 ```
 
 Dentro da pasta do repositório, siga estas etapas:
+
+- Para realizar os testes unitários no back-end:
+
+```
+cd realgram-backend
+
+npm install
+
+npm run test
+```
 
 - Para iniciar o servidor front-end:
 
