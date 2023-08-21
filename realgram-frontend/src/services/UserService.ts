@@ -7,6 +7,12 @@ export default {
   getUserByUsername: (username: string) => {
     return axiosInstance.get(`/user/get-by-username/${username}`);
   },
+  getUserFollowers: (username: string) => {
+    return axiosInstance.get(`/user/get-followers-by-username/${username}`);
+  },
+  getUserFollowing: (username: string) => {
+    return axiosInstance.get(`/user/get-following-by-username/${username}`);
+  },
   editUserProfile: (
     userID: string,
     name: string,

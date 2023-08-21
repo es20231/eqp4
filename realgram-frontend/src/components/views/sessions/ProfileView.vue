@@ -12,9 +12,26 @@
       @update="editUserModal.update()"
       v-model:open="editUserModal.visible"
     />
+    <ShowUserFollowersModal
+      :username="followersModal.username"
+      v-if="followersModal.visible"
+      @close="followersModal.close()"
+      @cancel="followersModal.close()"
+      @update="followersModal.update()"
+      v-model:open="followersModal.visible"
+    />
+    <ShowUserFollowingModal
+      :username="followingModal.username"
+      v-if="followingModal.visible"
+      @close="followingModal.close()"
+      @cancel="followingModal.close()"
+      @update="followingModal.update()"
+      v-model:open="followingModal.visible"
+    />
 
     <!-- Content -->
     <div class="profile-view__content" v-if="!userIsLoading">
+      <!-- Header -->
       <div class="profile-view__header">
         <img
           alt="Foto do usuário"
@@ -25,6 +42,7 @@
               : require('@/assets/imgs/default-avatar.png')
           "
         />
+
         <div class="header__content">
           <div class="content__row">
             <!-- User @ -->
@@ -49,10 +67,16 @@
             <span class="content__pub-counter">
               {{ `${userData?.posts?.length} publicações` }}
             </span>
-            <span class="content__pub-counter">
+            <span
+              class="content__pub-counter --pointer"
+              @click="followersModal.open(userData?.username)"
+            >
               {{ `${userData?.followers?.length} seguidores` }}
             </span>
-            <span class="content__pub-counter">
+            <span
+              class="content__pub-counter --pointer"
+              @click="followingModal.open(userData?.username)"
+            >
               {{ `${userData?.following?.length} seguindo` }}
             </span>
           </div>
@@ -66,11 +90,13 @@
         </div>
       </div>
 
+      <!-- Body -->
       <div class="profile-view__images-container">
         <a-tabs v-model:activeKey="activeTab" centered>
           <a-tab-pane key="library-tab" tab="Biblioteca" v-if="isAuthProfile">
             <UserLibraryTable
-              :library="userData?.library.reverse()"
+              :library="userData?.library"
+              @update="fetchUserData()"
             ></UserLibraryTable>
           </a-tab-pane>
 
@@ -98,6 +124,8 @@ import IUserData from "@/interfaces/IUserData";
 import UserService from "@/services/UserService";
 import CacheManager from "@/utils/CacheManager";
 import SendNotification from "@/utils/SendNotification";
+import ShowUserFollowersModal from "./modals/ShowUserFollowersModal.vue";
+import ShowUserFollowingModal from "./modals/ShowUserFollowingModal.vue";
 
 interface Props {
   username: string;
@@ -134,6 +162,38 @@ const authFollowThisUser = computed(() => {
   return follow;
 });
 
+const followersModal = reactive({
+  username: "",
+  visible: false,
+  open: (username: string) => {
+    followersModal.visible = true;
+    followersModal.username = username;
+  },
+  close: () => {
+    followersModal.username = "";
+    followersModal.visible = false;
+  },
+  update: () => {
+    followersModal.close();
+    fetchUserData();
+  },
+});
+const followingModal = reactive({
+  username: "",
+  visible: false,
+  open: (username: string) => {
+    followingModal.visible = true;
+    followingModal.username = username;
+  },
+  close: () => {
+    followingModal.username = "";
+    followingModal.visible = false;
+  },
+  update: () => {
+    followingModal.close();
+    fetchUserData();
+  },
+});
 const editUserModal = reactive({
   visible: false,
   open: () => {
@@ -284,6 +344,10 @@ async function fetchUserData() {
         align-items: center;
         justify-content: flex-start;
         gap: 40px;
+
+        span {
+          cursor: pointer;
+        }
       }
       .content__column {
         width: 100%;
@@ -303,6 +367,10 @@ async function fetchUserData() {
       .content__pub-counter {
         font-size: 16px;
         font-weight: 400;
+
+        &.--pointer {
+          cursor: pointer;
+        }
       }
 
       .content__name {

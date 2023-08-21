@@ -84,13 +84,14 @@ function handleSelect(event: any) {
 
   console.log(file);
 
-  if (!file.type.includes("image")) {
+  if (!file.type.match(/(jpg|jpeg|png)$/)) {
     SendNotification("warning", {
       duration: 3,
       placement: "bottomRight",
       message:
-        "O arquivo selecionado não é uma imagem válida. Por favor, selecione uma imagem!",
+        "Somente são aceitos arquivos no formato JPG, JPEG e PNG. Por favor, selecione uma imagem válida!",
     });
+    handleRemoveImageClick();
     return;
   }
 
@@ -101,6 +102,7 @@ function handleSelect(event: any) {
       message:
         "O arquivo selecionado é maior do que 10 MB. Por favor, selecione uma imagem menor!",
     });
+    handleRemoveImageClick();
     return;
   }
 

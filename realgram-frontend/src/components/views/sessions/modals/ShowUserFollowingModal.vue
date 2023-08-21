@@ -1,20 +1,25 @@
 <template>
-  <a-drawer
-    closable
-    keyboard
-    title="Pesquisa"
-    placement="left"
-    class="search-drawer"
+  <a-modal
+    size="large"
+    :width="300"
+    title="Seguidores"
+    class="show-user-following-modal"
+    :footer="false"
   >
-    <div class="drawer__container">
+    <div class="modal__content">
       <!-- Search -->
       <DefaultInput
         v-model="inputFilter"
         placeholder="Pesquisar"
       ></DefaultInput>
 
+      <!-- No Content -->
+      <div class="content_no-data" v-if="followingList.length == 0">
+        <span> Lista de seguindo vazia. </span>
+      </div>
+
       <!-- List -->
-      <div class="containe__user-list">
+      <div class="containe__user-list" v-else>
         <!-- Item -->
         <template :key="user._id" v-for="user in filteredList">
           <div class="user-list__item" @click="handleUserClick(user)">
@@ -22,44 +27,66 @@
               :size="38"
               :src="
                 user.profilePhoto
-                  ? apiRootURL + '/uploads/' + user.profilePhoto
+                  ? user.profilePhoto
                   : require('@/assets/imgs/default-avatar.png')
               "
             />
+
             <div class="item__data">
               <span class="data__title">{{ user.username }}</span>
               <span class="data__subtitle">{{ user.name }}</span>
+            </div>
+
+            <div class="item__btn">
+              <DefaultButton
+                :loading="followIsLoading"
+                @click="handleFollowClick(user)"
+                :type="authUserFollowThisUser(user) ? 'default' : 'primary'"
+                >{{
+                  authUserFollowThisUser(user) ? "Seguindo" : "Seguir"
+                }}</DefaultButton
+              >
             </div>
           </div>
         </template>
       </div>
     </div>
-  </a-drawer>
+  </a-modal>
 </template>
 
 <script setup lang="ts">
-import DefaultInput from "@/components/general/inputs/DefaultInput.vue";
-
-import { ref, onMounted, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import IUserData from "@/interfaces/IUserData";
+import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
+import DefaultInput from "@/components/general/inputs/DefaultInput.vue";
+import CacheManager from "@/utils/CacheManager";
 import UserService from "@/services/UserService";
 import SendNotification from "@/utils/SendNotification";
 import { useRouter } from "vue-router";
 
+interface Props {
+  username: string;
+}
+
+const props = defineProps<Props>();
+
 const emit = defineEmits(["close"]);
 
 onMounted(() => {
-  fetchUserList();
+  fetchUserFollowing();
 });
 
 const router = useRouter();
-const inputFilter = ref("");
-const userList = ref<IUserData[]>([]);
-const userListIsLoading = ref(false);
-const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
+const inputFilter = ref<string>("");
+const followingList = ref<IUserData[]>([]);
+const listIsLoading = ref<boolean>(false);
+const followIsLoading = ref<boolean>(false);
 
+const authUser = computed((): IUserData => {
+  return CacheManager.get("__user");
+});
 const filteredList = computed(() => {
-  return userList.value.filter(
+  return followingList.value.filter(
     (user) =>
       user.username
         .toLocaleLowerCase()
@@ -71,7 +98,7 @@ const filteredList = computed(() => {
 });
 
 function handleUserClick(user: IUserData) {
-  console.log("Handle Search User Click");
+  console.log("Handle User Click", user);
 
   emit("close");
 
@@ -83,48 +110,60 @@ function handleUserClick(user: IUserData) {
   });
 }
 
-async function fetchUserList() {
-  console.log("Fetch User List");
+function handleFollowClick(user: IUserData) {
+  console.log("Handle Follow Click", user);
+}
 
-  userListIsLoading.value = true;
+function authUserFollowThisUser(user: IUserData) {
+  let follow = false;
 
-  await UserService.getAllUser()
+  authUser.value?.following?.forEach((follower: string) => {
+    if (follower == user._id) follow = true;
+  });
+
+  return follow;
+}
+
+async function fetchUserFollowing() {
+  listIsLoading.value = true;
+
+  await UserService.getUserFollowing(props.username)
     .then((response) => {
-      console.log("Fetch User List Successful: ", response);
-      userList.value = response.data;
+      console.log("Get User Following", response);
+
+      followingList.value = response.data;
     })
     .catch((error) => {
-      console.log("Fetch User List Error: ", error);
+      console.log("Get User Following Error", error);
 
-      if (error.response) {
-        SendNotification("error", {
-          duration: 3,
-          placement: "bottomRight",
-          message: error.response.data.error,
-        });
-      } else {
-        SendNotification("error", {
-          duration: 3,
-          placement: "bottomRight",
-          message:
-            "Erro interno ao pesquisar lista de usuários, tente novamente.",
-        });
-      }
+      SendNotification("error", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Erro interno ao resgatar lista de seguindo, tente novamente",
+      });
     });
 
-  userListIsLoading.value = false;
+  listIsLoading.value = false;
 }
 </script>
 
 <style scoped lang="scss">
 @import "@/theme/variables.scss";
 
-.search-drawer {
-  .drawer__container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.show-user-following-modal {
+  .modal__content {
+    .content_no-data {
+      width: 100%;
+      margin-top: 20px;
+      text-align: center;
 
+      span {
+        font-size: 15px;
+        font-weight: 500;
+
+        color: $placeholder-color;
+      }
+    }
     .containe__user-list {
       max-height: 75vh;
 
