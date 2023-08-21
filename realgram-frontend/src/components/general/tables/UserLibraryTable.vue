@@ -64,15 +64,7 @@ const emit = defineEmits(["update"]);
 const props = defineProps<Props>();
 
 onMounted(() => {
-  window.addEventListener("scroll", () => {
-    const scrollY = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-    // Verifica se o usuário chegou ao final da página
-    if (scrollY + windowHeight >= documentHeight) {
-      loadMoreImages();
-    }
-  });
+  addEventScroll();
 });
 
 const imagesPerPage = 9;
@@ -138,10 +130,22 @@ const postImageModal = reactive({
 });
 
 const imageList = computed(() => {
-  const slicedList = props.library.slice(0, displayedImagesCount.value);
-  const sortedList = slicedList.reverse();
-  return sortedList;
+  const sortedList = [...props.library].reverse();
+  const slicedList = sortedList.slice(0, displayedImagesCount.value);
+  return slicedList;
 });
+
+function addEventScroll() {
+  window.addEventListener("scroll", () => {
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    // Verifica se o usuário chegou ao final da página
+    if (scrollY + windowHeight >= documentHeight) {
+      loadMoreImages();
+    }
+  });
+}
 
 // Function to load more images
 const loadMoreImages = () => {

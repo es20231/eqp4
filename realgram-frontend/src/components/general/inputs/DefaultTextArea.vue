@@ -7,8 +7,10 @@
       size="large"
       :value="modelValue"
       @change="emitChange"
-      :placeholder="placeholder"
+      :bordered="bordeless"
       :maxlength="maxLength"
+      :placeholder="placeholder"
+      :autoSize="{ minRows, maxRows }"
     />
     <span class="textarea__limit">{{
       `${modelValue.length}/${maxLength}`
@@ -37,11 +39,18 @@ interface Props {
   errors?: IErrorObject[];
   placeholder?: string;
   maxLength?: number;
+  height?: number;
+  bordeless?: boolean;
+  minRows?: number;
+  maxRows?: number;
 }
 
 withDefaults(defineProps<Props>(), {
   placeholder: "",
   maxLength: 300,
+  height: 150,
+  minRows: 2,
+  maxRows: 5,
 });
 
 function emitChange(event: Event) {

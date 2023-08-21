@@ -97,16 +97,32 @@ router.get("/post/get-current-user-posts", requireLogin, (req, res) => {
       console.log(err);
     });
 });
+
 //versão atualizada do like
-router.put("/post/like", requireLogin, (req, res) => {
+router.put("/post/like", requireLogin, async (req, res) => {
   const postId = req.body.postId;
   const userId = req.user._id;
 
-  Post.findById(postId).exec((err, post) => {
-    if (err || !post) {
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
       return res.status(422).json({ error: "Post não encontrado" });
     }
 
+    const existelikeIndex = post.likes.findIndex(
+      (item) => item.toString() === userId.toString()
+    );
+
+    if (existelikeIndex !== -1) {
+      // Se o like já existe, remova-o
+      post.likes.splice(existelikeIndex, 1);
+    } else {
+      // Se não existir, adicione o like
+      post.likes.push(userId);
+    }
+
+    // Remova o dislike se existir
     const ExisteDislikeIndex = post.dislikes.findIndex(
       (item) => item.toString() === userId.toString()
     );
@@ -115,32 +131,22 @@ router.put("/post/like", requireLogin, (req, res) => {
       post.dislikes.splice(ExisteDislikeIndex, 1);
     }
 
-    const existelikeIndex = post.likes.findIndex(
-      (item) => item.toString() === userId.toString()
-    );
-
-    if (existelikeIndex !== -1) {
-      return res.json(post);
-    }
-
-    post.likes.push(userId);
-
-    post.save((err, updatedPost) => {
-      if (err) {
-        return res.status(422).json({ error: err });
-      } else {
-        res.json(updatedPost);
-      }
-    });
-  });
+    const updatedPost = await post.save();
+    res.json(updatedPost);
+  } catch (err) {
+    return res.status(422).json({ error: err.message });
+  }
 });
 
 //Versão atualizada do dislike
-router.put("/post/dislike", requireLogin, (req, res) => {
+router.put("/post/dislike", requireLogin, async (req, res) => {
   const postId = req.body.postId;
   const userId = req.user._id;
-  Post.findById(postId).exec((err, post) => {
-    if (err || !post) {
+
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
       return res.status(422).json({ error: "Post não encontrado" });
     }
 
@@ -157,19 +163,18 @@ router.put("/post/dislike", requireLogin, (req, res) => {
     );
 
     if (ExisteDislikeIndex !== -1) {
-      return res.json(post);
+      // Se o dislike já existe, remova-o
+      post.dislikes.splice(ExisteDislikeIndex, 1);
+    } else {
+      // Se não existir, adicione o dislike
+      post.dislikes.push(userId);
     }
 
-    post.dislikes.push(userId);
-
-    post.save((err, updatedPost) => {
-      if (err) {
-        return res.status(422).json({ error: err });
-      } else {
-        res.json(updatedPost);
-      }
-    });
-  });
+    const updatedPost = await post.save();
+    res.json(updatedPost);
+  } catch (err) {
+    return res.status(422).json({ error: err.message });
+  }
 });
 
 router.put("/post/comment", requireLogin, (req, res) => {

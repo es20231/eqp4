@@ -1,7 +1,7 @@
 <template>
   <i
     class="default-icon"
-    :class="name"
+    :class="[name, { '--pointer': pointer }]"
     :style="{
       fontSize: size,
       color: color,
@@ -23,6 +23,10 @@ defineProps({
     type: String,
     required: true,
   },
+  pointer: {
+    type: Boolean,
+    default: false,
+  },
 });
 </script>
 
@@ -30,5 +34,9 @@ defineProps({
 .default-icon {
   width: min-content;
   height: min-content;
+
+  &.--pointer {
+    cursor: pointer;
+  }
 }
 </style>
