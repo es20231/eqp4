@@ -58,7 +58,7 @@ router.post(
         uploadedBy: new mongoose.Types.ObjectId(userId),
       }));
 
-      await UserImage.create(uploadedImages);
+      await Library.create(uploadedImages);
 
       res.status(200).json({ message: "Salvo com sucesso!" });
     } catch (error) {
@@ -107,7 +107,7 @@ router.get("/library/images/:userId", requireLogin, async (req, res) => {
       return res.status(404).json({ error: "Usuário não encontrado." });
     }
     // Encontre as imagens associadas ao usuário pelo ID do usuário
-    const userImages = await UserImage.find({ uploadedBy: userId });
+    const userImages = await Library.find({ uploadedBy: userId });
 
     res.status(200).json({ images: userImages });
   } catch (error) {
@@ -119,13 +119,13 @@ router.get("/library/images/:userId", requireLogin, async (req, res) => {
 router.delete("/library/remove-image/:id", requireLogin, async (req, res) => {
   try {
     const imageId = req.params.id;
-    const existingImage = await UserImage.findById(imageId);
+    const existingImage = await Library.findById(imageId);
 
     if (!existingImage) {
       return res.status(404).json({ error: "Imagem não encontrada." });
     }
 
-    await UserImage.findByIdAndRemove(imageId);
+    await Library.findByIdAndRemove(imageId);
 
     const imagePath = path.join("./uploads", existingImage.fileName);
 
