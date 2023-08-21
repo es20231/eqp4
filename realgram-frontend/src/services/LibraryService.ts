@@ -12,6 +12,6 @@ export default {
     });
   },
   deleteImageFromLibrary: (imageID: string) => {
-    return axiosInstance.delete(`/library/delete-image/${imageID}`);
+    return axiosInstance.delete(`/library/remove-image/${imageID}`);
   },
 };
