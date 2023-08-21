@@ -17,7 +17,7 @@ afterAll(() => {
 });
 
 describe("GET /auth/register usuário valido", () => {
-  test("should return users", async () => {
+  test("should return user", async () => {
     const data = {
       name: "Usuário de Teste",
       username: "unitytester",
@@ -31,7 +31,7 @@ describe("GET /auth/register usuário valido", () => {
 });
 
 describe("GET /auth/register usuário vazio", () => {
-  test("should return users", async () => {
+  test("should return error", async () => {
     const data = {
       name: "",
       username: "",
@@ -44,7 +44,7 @@ describe("GET /auth/register usuário vazio", () => {
 });
 
 describe("GET /auth/register usuário que já existe", () => {
-  test("should return users", async () => {
+  test("should return error", async () => {
     const data = {
       name: "Usuário de Teste",
       username: "unitytester",
@@ -58,7 +58,7 @@ describe("GET /auth/register usuário que já existe", () => {
 });
 
 describe("GET /auth/login usuário válido", () => {
-  test("should return users", async () => {
+  test("should return user", async () => {
     const data = {
       email: "usertest@test.com",
       password: "test123",
@@ -74,7 +74,7 @@ describe("GET /auth/login usuário válido", () => {
 });
 
 describe("GET /auth/login usuário senha errada", () => {
-  test("should return users", async () => {
+  test("should return error", async () => {
     const data = {
       email: "usertest@test.com",
       password: "invalidpassword",
@@ -86,7 +86,7 @@ describe("GET /auth/login usuário senha errada", () => {
 });
 
 describe("GET /auth/login usuário email errado", () => {
-  test("should return users", async () => {
+  test("should return error", async () => {
     const data = {
       email: "2d1312d123g12g1uihdf123ud123d12uf12@gmail.com",
       password: "sojesussalvva",
@@ -98,7 +98,7 @@ describe("GET /auth/login usuário email errado", () => {
 });
 
 describe("GET /auth/login usuário vazio", () => {
-  test("should return users", async () => {
+  test("should return error", async () => {
     const data = {
       email: "",
       password: "",
