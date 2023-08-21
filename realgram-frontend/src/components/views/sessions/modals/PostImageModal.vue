@@ -37,7 +37,10 @@
             placeholder="Escreva uma descrição..."
           ></DefaultTextArea>
 
-          <DefaultButton type="primary" @click="postImageToTimeline"
+          <DefaultButton
+            type="primary"
+            :loading="postIsLoading"
+            @click="postImageToTimeline"
             >Postar</DefaultButton
           >
         </div>

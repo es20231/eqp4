@@ -1,5 +1,3 @@
-import IUserData from "./IUserData";
-
 export default interface IUserPost {
   _id: string;
   title: string;
@@ -7,7 +5,8 @@ export default interface IUserPost {
   photo: string;
   likes: string[];
   dislikes: string[];
-  postedBy: IUserData;
+  comentarios: string[];
+  postedBy: string;
   createdAt: string;
   updatedAt: string;
 }
