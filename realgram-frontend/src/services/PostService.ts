@@ -13,4 +13,14 @@ export default {
       },
     });
   },
+  likePost: (postId: string) => {
+    return axiosInstance.put("/post/like", {
+      postId,
+    });
+  },
+  dislikePost: (postId: string) => {
+    return axiosInstance.put("/post/dislike", {
+      postId,
+    });
+  },
 };

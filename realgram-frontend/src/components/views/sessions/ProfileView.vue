@@ -102,7 +102,9 @@
 
           <a-tab-pane key="posts-tab" tab="Postagens">
             <UserPostsTable
+              :user="userData"
               :posts="userData?.posts"
+              @update="fetchUserData()"
               :isAuthUserProfile="isAuthProfile"
             ></UserPostsTable>
           </a-tab-pane>
@@ -344,10 +346,6 @@ async function fetchUserData() {
         align-items: center;
         justify-content: flex-start;
         gap: 40px;
-
-        span {
-          cursor: pointer;
-        }
       }
       .content__column {
         width: 100%;
