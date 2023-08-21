@@ -19,7 +19,7 @@
         class="table__img"
         v-for="item in posts"
         alt="Imagem do post do usuário"
-        :src="'http://localhost:3000/uploads/' + item.photo"
+        :src="apiRootURL + '/uploads/' + item.photo"
       />
     </div>
   </div>
@@ -27,6 +27,7 @@
 
 <script setup lang="ts">
 import IUserPost from "@/interfaces/IUserPost";
+import { ref } from "vue";
 
 interface Props {
   posts: IUserPost[];
@@ -34,6 +35,8 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
 </script>
 
 <style scoped lang="scss">
