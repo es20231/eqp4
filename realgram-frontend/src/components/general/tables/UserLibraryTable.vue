@@ -2,12 +2,21 @@
   <div class="user-library-table-container" id="scroll">
     <!-- Modals -->
     <ImageOptionsModal
-      :imageID="imageOptionsModal.imageID"
+      :image="imageOptionsModal.image"
       v-if="imageOptionsModal.visible"
       @close="imageOptionsModal.close()"
       @cancel="imageOptionsModal.close()"
       @update="imageOptionsModal.update()"
+      @postImage="imageOptionsModal.postImage"
       v-model:open="imageOptionsModal.visible"
+    />
+    <PostImageModal
+      :image="postImageModal.image"
+      v-if="postImageModal.visible"
+      @close="postImageModal.close()"
+      @cancel="postImageModal.close()"
+      @update="postImageModal.update()"
+      v-model:open="postImageModal.visible"
     />
 
     <!-- No Images Message -->
@@ -44,6 +53,7 @@ import { ref, onMounted, computed, reactive } from "vue";
 import ILibraryImage from "@/interfaces/ILibraryImage";
 import DefaultIcon from "../icons/DefaultIcon.vue";
 import ImageOptionsModal from "@/components/views/sessions/modals/ImageOptionsModal.vue";
+import PostImageModal from "@/components/views/sessions/modals/PostImageModal.vue";
 
 interface Props {
   library: ILibraryImage[];
@@ -52,23 +62,6 @@ interface Props {
 const emit = defineEmits(["update"]);
 
 const props = defineProps<Props>();
-
-const imageOptionsModal = reactive({
-  visible: false,
-  imageID: "",
-  open: (image: ILibraryImage) => {
-    imageOptionsModal.imageID = image._id;
-    imageOptionsModal.visible = true;
-  },
-  close: () => {
-    imageOptionsModal.imageID = "";
-    imageOptionsModal.visible = false;
-  },
-  update: () => {
-    imageOptionsModal.close();
-    emit("update");
-  },
-});
 
 onMounted(() => {
   window.addEventListener("scroll", () => {
@@ -85,6 +78,64 @@ onMounted(() => {
 const imagesPerPage = 9;
 const displayedImagesCount = ref(imagesPerPage);
 const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
+
+const imageOptionsModal = reactive({
+  visible: false,
+  image: {
+    _id: "",
+    fileName: "",
+    createdAt: "",
+    updatedAt: "",
+  },
+  open: (image: ILibraryImage) => {
+    imageOptionsModal.image = image;
+    imageOptionsModal.visible = true;
+  },
+  close: () => {
+    imageOptionsModal.image = {
+      _id: "",
+      fileName: "",
+      createdAt: "",
+      updatedAt: "",
+    };
+    imageOptionsModal.visible = false;
+  },
+  update: () => {
+    imageOptionsModal.close();
+    emit("update");
+  },
+  postImage: (image: ILibraryImage) => {
+    imageOptionsModal.close();
+    postImageModal.open(image);
+  },
+});
+
+const postImageModal = reactive({
+  visible: false,
+  image: {
+    _id: "",
+    fileName: "",
+    createdAt: "",
+    updatedAt: "",
+  },
+  open: (image: ILibraryImage) => {
+    postImageModal.image = image;
+    postImageModal.visible = true;
+  },
+  close: () => {
+    postImageModal.image = {
+      _id: "",
+      fileName: "",
+      createdAt: "",
+      updatedAt: "",
+    };
+    postImageModal.visible = false;
+  },
+  update: () => {
+    postImageModal.close();
+    emit("update");
+  },
+});
 
 const imageList = computed(() => {
   const slicedList = props.library.slice(0, displayedImagesCount.value);

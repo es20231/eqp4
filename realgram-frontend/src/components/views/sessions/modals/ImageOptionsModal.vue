@@ -1,10 +1,11 @@
 <template>
   <a-modal
+    centered
     size="large"
     :width="350"
+    :footer="false"
     title="Opções"
     class="image-options-modal"
-    :footer="false"
   >
     <div class="modal__content">
       <template :key="item.key" v-for="item in menuOptions">
@@ -19,20 +20,19 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import SendNotification from "@/utils/SendNotification";
-import { MenuProps } from "ant-design-vue";
 import LibraryService from "@/services/LibraryService";
 import { Modal } from "ant-design-vue";
 import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
+import ILibraryImage from "@/interfaces/ILibraryImage";
 
 interface Props {
-  imageID: string;
+  image: ILibraryImage;
 }
 
 const props = defineProps<Props>();
 
-const emit = defineEmits(["update"]);
+const emit = defineEmits(["update", "postImage"]);
 
-// const router = useRouter();
 const deleteIsLoading = ref<boolean>(false);
 const menuOptions = ref([
   {
@@ -52,11 +52,7 @@ const menuOptions = ref([
 ]);
 
 function handlePostImage() {
-  SendNotification("info", {
-    duration: 3,
-    placement: "bottomRight",
-    message: "Em construção...",
-  });
+  emit("postImage", props.image);
 }
 
 function confirmDeleteModal() {
@@ -76,7 +72,7 @@ function confirmDeleteModal() {
 async function deleteImageFromLibrary() {
   deleteIsLoading.value = true;
 
-  await LibraryService.deleteImageFromLibrary(props.imageID)
+  await LibraryService.deleteImageFromLibrary(props.image._id)
     .then((response) => {
       console.log("Delete Image", response);
 

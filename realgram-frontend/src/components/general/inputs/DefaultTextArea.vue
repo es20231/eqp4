@@ -8,7 +8,11 @@
       :value="modelValue"
       @change="emitChange"
       :placeholder="placeholder"
+      :maxlength="maxLength"
     />
+    <span class="textarea__limit">{{
+      `${modelValue.length}/${maxLength}`
+    }}</span>
   </div>
 </template>
 
@@ -32,10 +36,12 @@ interface Props {
   modelValue: string;
   errors?: IErrorObject[];
   placeholder?: string;
+  maxLength?: number;
 }
 
 withDefaults(defineProps<Props>(), {
   placeholder: "",
+  maxLength: 300,
 });
 
 function emitChange(event: Event) {
@@ -60,6 +66,37 @@ function emitChange(event: Event) {
     font-style: italic;
     font-weight: 300;
     color: $placeholder-color;
+  }
+
+  .textarea__limit {
+    width: 100%;
+    text-align: right;
+    font-size: 14px;
+    color: #888;
+  }
+}
+</style>
+
+<style lang="scss">
+.default-textarea {
+  textarea {
+    height: 130px;
+    resize: none !important;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f0f0f0;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: #888;
+      border-radius: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: #f0f0f0;
+    }
   }
 }
 </style>
