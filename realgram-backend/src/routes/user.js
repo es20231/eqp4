@@ -231,4 +231,24 @@ router.get('/user/get-followers-by-username/:username', async (req, res) => {
   }
 });
 
+
+//recebe um username e retorna a lista de usuários que o usuário está seguindo
+router.get('/user/get-following-by-username/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Encontrar o usuário pelo username e popular a lista de quem ele está seguindo
+    const user = await User.findOne({ username }).populate('following', 'username');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+
+    return res.json({ following: user.following });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro interno do servidor.' });
+  }
+});
+
 module.exports = router;
