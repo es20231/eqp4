@@ -217,37 +217,43 @@ router.get('/user/get-followers-by-username/:username', async (req, res) => {
   try {
     const { username } = req.params;
 
-    // Encontrar o usuário pelo username
-    const user = await User.findOne({ username }).populate('followers', 'username');
+    // Encontre o usuário com o username fornecido
+    const user = await User.findOne({ username })
+      .populate('followers', '-password') // Popule os seguidores, excluindo a senha
 
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado.' });
+      return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-
-    return res.json({ followers: user.followers });
+    // Retorne os dados do usuário e seus seguidores
+    res.json({
+      followers: user.followers,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
-
 
 //recebe um username e retorna a lista de usuários que o usuário está seguindo
 router.get('/user/get-following-by-username/:username', async (req, res) => {
   try {
     const { username } = req.params;
 
-    // Encontrar o usuário pelo username e popular a lista de quem ele está seguindo
-    const user = await User.findOne({ username }).populate('following', 'username');
+    // Encontre o usuário com o username fornecido
+    const user = await User.findOne({ username })
+      .populate('following', '-password') // Popule os usuários que está seguindo, excluindo a senha
 
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado.' });
+      return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    return res.json({ following: user.following });
+    // Retorne os dados do usuário e quem ele está seguindo
+    res.json({
+      following: user.following,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
