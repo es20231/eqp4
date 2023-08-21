@@ -12,14 +12,29 @@ require("./models/user");
 require("./models/post");
 require("./models/library");
 
-app.use(cors());
+// Cors Config
+const allowedOrigins = [
+  "http://localhost:8080",
+  "https://realgram-frontend.vercel.app",
+];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
+
 app.use(express.json());
 app.use(require("./routes/auth"));
 app.use(require("./routes/post"));
 app.use(require("./routes/user"));
 app.use(require("./routes/library"));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-
 
 mongoose.connect(MONGOURI, {
   useNewUrlParser: true,
