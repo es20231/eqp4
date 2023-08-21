@@ -11,6 +11,7 @@ const multer = require("multer");
 require("./models/user");
 require("./models/post");
 require("./models/library");
+
 app.use(cors());
 app.use(express.json());
 app.use(require("./routes/auth"));
@@ -18,6 +19,7 @@ app.use(require("./routes/post"));
 app.use(require("./routes/user"));
 app.use(require("./routes/library"));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 
 mongoose.connect(MONGOURI, {
   useNewUrlParser: true,
