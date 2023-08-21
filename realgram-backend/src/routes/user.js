@@ -4,13 +4,14 @@ const mongoose = require("mongoose");
 const requireLogin = require("../middleware/requireLogin");
 const User = mongoose.model("User");
 const Post = mongoose.model("Post");
-const multer = require('multer');
-const fs = require('fs')
+const Library = mongoose.model("Library");
+const multer = require("multer");
+const fs = require("fs");
 
 // Configurando o multer para o upload de imagens
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./uploads/")
+    cb(null, "./uploads/");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + file.originalname);
@@ -20,7 +21,7 @@ const storage = multer.diskStorage({
 // Filtrar apenas imagens .jpg e .png
 const imageFilter = function (req, file, cb) {
   if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-    return cb(('Somente imagens .jpg, .jpeg e .png são permitidas!'), false);
+    return cb("Somente imagens .jpg, .jpeg e .png são permitidas!", false);
   }
   cb(null, true);
 };
@@ -29,8 +30,7 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // Limite de 10MB para o tamanho do arquivo
   fileFilter: imageFilter, // Aplicar o filtro personalizado para imagens
-}).single('profilePhoto');
-
+}).single("profilePhoto");
 
 // Get User By Username
 router.get(
@@ -50,10 +50,14 @@ router.get(
       // Encontrar os posts do usuário usando a função populate
       const posts = await Post.find({ postedBy: user._id });
 
+      // Encontrar a library do usuário usando a função populate
+      const library = await Library.find({ uploadedBy: user._id });
+
       // Retornar o usuário com os posts como atributo
       res.json({
         ...user._doc,
         posts,
+        library,
       });
     } catch (err) {
       console.log(err);
@@ -75,68 +79,79 @@ router.get("/user/get-all", requireLogin, (req, res) => {
 });
 
 // Delete User
-router.delete("/user/delete/:userId", requireLogin, (req, res) => {
-  const userId = req.params.userId;
+router.delete("/user/delete/:id", requireLogin, async (req, res) => {
+  try {
+    const userId = req.params.id;
 
-  User.findByIdAndRemove(userId)
-    .then((deletedUser) => {
-      if (!deletedUser) {
-        return res.status(404).json({ error: "Usuário não encontrado." });
-      }
-      res.status(200).json({ message: "Usuário removido com sucesso." });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: "Ocorreu um erro ao remover o usuário." });
-    });
+    // Encontrar e deletar o usuário pelo ID
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    res.json({ message: "Usuário deletado com sucesso", user: deletedUser });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Erro ao deletar usuário", error: err.message });
+  }
 });
 
 // Rota para editar o perfil do usuário
-router.put('/user/edit-current-user-profile/:userId', requireLogin, upload, async (req, res) => {
-  const userId = req.params.userId;
+router.put(
+  "/user/edit-current-user-profile/:userId",
+  requireLogin,
+  upload,
+  async (req, res) => {
+    const userId = req.params.userId;
 
-  try {
-    const user = await User.findById(userId);
+    try {
+      const user = await User.findById(userId);
 
-    if (!user) {
-      return res.status(404).json({ error: 'Usuário não encontrado.' });
-    }
-    // Atualizar os campos de acordo com os dados fornecidos na requisição
-    if (req.body.name) {
-      user.name = req.body.name;
-    }
-    if (req.body.description) {
-      user.description = req.body.description;
-    }
-    // Se houver um arquivo de imagem enviado, atualizar o campo "profilePhoto"
-    if (req.file) {
-      // Primeiro, vamos remover a imagem anterior se ela existir
-      if (user.profilePhoto) {
-        fs.unlinkSync('./uploads/' + user.profilePhoto); // Remover a imagem do diretório
+      if (!user) {
+        return res.status(404).json({ error: "Usuário não encontrado." });
       }
-      user.profilePhoto = req.file.filename; // Atualizar o campo com o novo caminho da imagem
-    }
-    // Verificar se a opção para remover a foto de perfil foi marcada
-    if (req.body.removeProfilePhoto) {
-      // Primeiro, vamos remover a imagem atual se ela existir
-      if (user.profilePhoto) {
-        fs.unlinkSync('./uploads/' + user.profilePhoto); // Remover a imagem do diretório
+      // Atualizar os campos de acordo com os dados fornecidos na requisição
+      if (req.body.name) {
+        user.name = req.body.name;
       }
-      user.profilePhoto = ''; // Atualizar o campo para vazio, removendo a imagem do banco de dados
-    }
-    // Salvar as alterações no banco de dados
-    const updatedUser = await user.save();
+      if (req.body.description) {
+        user.description = req.body.description;
+      }
+      // Se houver um arquivo de imagem enviado, atualizar o campo "profilePhoto"
+      if (req.file) {
+        // Primeiro, vamos remover a imagem anterior se ela existir
+        if (user.profilePhoto) {
+          fs.unlinkSync("./uploads/" + user.profilePhoto); // Remover a imagem do diretório
+        }
+        user.profilePhoto = req.file.filename; // Atualizar o campo com o novo caminho da imagem
+      }
+      // Verificar se a opção para remover a foto de perfil foi marcada
+      if (req.body.removeProfilePhoto) {
+        // Primeiro, vamos remover a imagem atual se ela existir
+        if (user.profilePhoto) {
+          fs.unlinkSync("./uploads/" + user.profilePhoto); // Remover a imagem do diretório
+        }
+        user.profilePhoto = ""; // Atualizar o campo para vazio, removendo a imagem do banco de dados
+      }
+      // Salvar as alterações no banco de dados
+      const updatedUser = await user.save();
 
-    res.json({ message: 'Perfil atualizado com sucesso.', user: updatedUser });
-  } catch (error) {
-    // Verificando se o erro é relacionado ao campo profilePhoto
-    if (error.errors && error.errors.profilePhoto) {
-      return res.status(422).json({ error: "URL de imagem inválida" });
+      res.json({
+        message: "Perfil atualizado com sucesso.",
+        user: updatedUser,
+      });
+    } catch (error) {
+      // Verificando se o erro é relacionado ao campo profilePhoto
+      if (error.errors && error.errors.profilePhoto) {
+        return res.status(422).json({ error: "URL de imagem inválida" });
+      }
+      console.error("Erro ao editar perfil:", error);
+      return res.status(500).json({ error: "Erro ao editar perfil." });
     }
-    console.error('Erro ao editar perfil:', error);
-    return res.status(500).json({ error: 'Erro ao editar perfil.' });
   }
-});
+);
 
 router.put("/user/follow", requireLogin, async (req, res) => {
   const { followId } = req.body;

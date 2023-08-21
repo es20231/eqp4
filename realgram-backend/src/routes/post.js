@@ -3,6 +3,26 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const requireLogin = require("../middleware/requireLogin");
 const Post = mongoose.model("Post");
+const multer = require("multer");
+
+// Configurando o armazenamento do multer para postagem(linha 42)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/user_images');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  },
+});
+// Filtro para permitir apenas imagens
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('O arquivo enviado não é uma imagem!'), false);
+  }
+};
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 router.get("/post/get-all", (req, res) => {
   Post.find()
@@ -28,7 +48,7 @@ router.get('/post/get-timeline',requireLogin,(req,res) => {
   })
 })
 
-router.post("/post/create", requireLogin, (req, res) => {
+router.post("/post/create", requireLogin,upload.single("image"), (req, res) => {
   const { title, body } = req.body;
   
   if (!title || !body) {
@@ -36,10 +56,16 @@ router.post("/post/create", requireLogin, (req, res) => {
       .status(422)
       .json({ error: "Por favor, adicione todos os parametros" });
   }
+  if(!req.file){
+    return res.status(400).json({error: "Por favor, selecione uma imagem para postar"});
+  }
+  const photo = req.file.filename;
+
   req.user.password = undefined;
   const post = new Post({
     title,
     body,
+    photo,
     postedBy: req.user,
   });
   post

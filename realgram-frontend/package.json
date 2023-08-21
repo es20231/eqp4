@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "start": "node server.js",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@iconify/iconify": "^3.1.1",
@@ -15,6 +17,7 @@
     "@vuelidate/validators": "^2.0.3",
     "ant-design-vue": "^4.0.0",
     "axios": "^1.4.0",
+    "express": "^4.18.2",
     "remixicon": "^3.4.0",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
@@ -45,5 +48,12 @@
     "sass-loader": "^12.0.0",
     "ts-jest": "^27.0.4",
     "typescript": "~4.5.5"
-  }
+  },
+  "description": "```\r npm install\r ```",
+  "main": ".eslintrc.js",
+  "directories": {
+    "test": "tests"
+  },
+  "author": "",
+  "license": "ISC"
 }

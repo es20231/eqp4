@@ -4,7 +4,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const User = mongoose.model("User");
-const UserImage = mongoose.model("UserImage");
+const Library = require("../models/library.js");
 const multer = require('multer');
 const requireLogin = require('../middleware/requireLogin.js');
 
@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
     cb(null, './public/user_images');
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+    cb(null, Date.now() + "-" + file.originalname);
   },
 });
 
@@ -32,9 +32,8 @@ const upload = multer({
   fileFilter: imageFilter
 });
 
-
 // Rota para upload de ate 10 imagens por envio
-router.post('/library/save-image', requireLogin, (req, res, next) => {
+router.post('/library/save-image-list', requireLogin, (req, res, next) => {
   upload.array('images', 10)(req, res, (err) => {
     if (err) {
       if (err.code === 'LIMIT_UNEXPECTED_FILE') {
@@ -61,6 +60,36 @@ router.post('/library/save-image', requireLogin, (req, res, next) => {
     res.status(500).json({ error: 'Ocorreu um erro ao enviar as imagens.' });
   }
 });
+  
+// Rota para salvar uma imagem
+router.post(
+  "/library/save-image",
+  upload.single("image"),
+  requireLogin,
+  async (req, res) => {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ error: "Por favor, selecione uma imagem para salvar." });
+    }
+
+    const fileName = req.file.filename;
+    const newImage = new Library({
+      fileName: fileName,
+      uploadedBy: req.user._id,
+    });
+
+    try {
+      await newImage.save();
+      return res.json({ message: "Imagem salva com sucesso" });
+    } catch (err) {
+      console.error("Erro ao salvar a imagem no banco de dados:", err);
+      return res
+        .status(500)
+        .json({ error: "Erro ao salvar a imagem no banco de dados" });
+      }
+  }
+);
 
 //rota GET para recuperar informações sobre as imagens associadas a um usuário
 router.get('/library/images/:userId', requireLogin, async (req, res) => {
@@ -70,7 +99,6 @@ router.get('/library/images/:userId', requireLogin, async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado.' });
     }
-
     // Encontre as imagens associadas ao usuário pelo ID do usuário
     const userImages = await UserImage.find({ uploadedBy: userId });
 

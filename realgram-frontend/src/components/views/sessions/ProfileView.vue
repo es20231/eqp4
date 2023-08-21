@@ -9,18 +9,19 @@
       v-if="editUserModal.visible"
       @close="editUserModal.close()"
       @cancel="editUserModal.close()"
+      @update="editUserModal.update()"
       v-model:open="editUserModal.visible"
     />
 
     <!-- Content -->
-    <div class="profile-view__content">
+    <div class="profile-view__content" v-if="!userIsLoading">
       <div class="profile-view__header">
         <img
           alt="Foto do usuário"
           class="header__user-image"
           :src="
-            userData?.profileImage
-              ? userData.profileImage
+            userData?.profilePhoto
+              ? 'http://localhost:3000/uploads/' + userData.profilePhoto
               : require('@/assets/imgs/default-avatar.png')
           "
         />
@@ -68,11 +69,16 @@
       <div class="profile-view__images-container">
         <a-tabs v-model:activeKey="activeTab" centered>
           <a-tab-pane key="library-tab" tab="Biblioteca" v-if="isAuthProfile">
-            <UserLibraryTable :library="[]"></UserLibraryTable>
+            <UserLibraryTable
+              :library="userData?.library.reverse()"
+            ></UserLibraryTable>
           </a-tab-pane>
 
           <a-tab-pane key="posts-tab" tab="Postagens">
-            <UserPostsTable :posts="[]"></UserPostsTable>
+            <UserPostsTable
+              :posts="userData?.posts"
+              :isAuthUserProfile="isAuthProfile"
+            ></UserPostsTable>
           </a-tab-pane>
         </a-tabs>
       </div>
@@ -101,12 +107,15 @@ const props = defineProps<Props>();
 
 onMounted(async () => {
   await fetchUserData();
+  if (!isAuthProfile.value) {
+    activeTab.value = "posts-tab";
+  }
 });
 
 const userData = ref<any>();
 const userIsLoading = ref(true);
 const followIsLoading = ref(false);
-const activeTab = ref<string>("posts-tab");
+const activeTab = ref<string>("library-tab");
 
 const authUser = computed((): IUserData => {
   return CacheManager.get("__user");
@@ -116,10 +125,6 @@ const isAuthProfile = computed((): boolean => {
 });
 const authFollowThisUser = computed(() => {
   let follow = false;
-
-  console.log("Calcul follow this user");
-  console.log("Auth User", authUser.value);
-  console.log("Profile User", userData.value);
 
   userData.value?.followers?.forEach((follower: string) => {
     if (follower == authUser.value._id) follow = true;
@@ -135,6 +140,10 @@ const editUserModal = reactive({
   },
   close: () => {
     editUserModal.visible = false;
+  },
+  update: () => {
+    editUserModal.close();
+    fetchUserData();
   },
 });
 
@@ -223,7 +232,7 @@ async function fetchUserData() {
 
 .profile-view {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
 
   padding: 30px 20px;
 
