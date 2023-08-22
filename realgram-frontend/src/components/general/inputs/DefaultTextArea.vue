@@ -13,7 +13,7 @@
       :autoSize="{ minRows, maxRows }"
     />
     <span class="textarea__limit">{{
-      `${modelValue.length}/${maxLength}`
+      `${modelValue?.length}/${maxLength}`
     }}</span>
   </div>
 </template>

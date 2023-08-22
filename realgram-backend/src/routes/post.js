@@ -38,20 +38,28 @@ router.get("/post/get-all", (req, res) => {
 
 router.get("/post/get-timeline", requireLogin, async (req, res) => {
   try {
-    const posts = await Post.find({ postedBy: { $in: req.user.following } })
+    const currentUser = req.user;
+
+    // Buscar posts do usuário autenticado e dos usuários que ele está seguindo
+    const posts = await Post.find({
+      $or: [
+        { postedBy: currentUser._id },
+        { postedBy: { $in: currentUser.following } },
+      ],
+    })
       .populate({
         path: "postedBy",
-        select: "-password", // Exclua o campo 'password'
+        select: "-password",
       })
       .populate({
         path: "likes dislikes",
-        select: "-password", // Exclua o campo 'password' dos usuários que deram likes/dislikes
+        select: "-password",
       })
       .populate({
         path: "comentarios",
         populate: {
           path: "postedBy",
-          select: "-password", // Exclua o campo 'password' dos usuários que postaram os comentários
+          select: "-password",
         },
       })
       .sort("-createdAt");
@@ -119,14 +127,22 @@ router.delete("/post/delete/:postId", requireLogin, async (req, res) => {
   const postId = req.params.postId;
 
   try {
-    const postToDelete = await Post.findOne({ _id: postId, postedBy: req.user._id });
+    const postToDelete = await Post.findOne({
+      _id: postId,
+      postedBy: req.user._id,
+    });
 
     if (!postToDelete) {
-      return res.status(404).json({ error: "Postagem não encontrada ou você não tem permissão para deletar." });
+      return res.status(404).json({
+        error:
+          "Postagem não encontrada ou você não tem permissão para deletar.",
+      });
     }
 
     if (postToDelete.postedBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: "Você não tem permissão para deletar esta postagem." });
+      return res
+        .status(403)
+        .json({ error: "Você não tem permissão para deletar esta postagem." });
     }
 
     const deletedPost = await Post.findByIdAndDelete(postId);

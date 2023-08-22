@@ -147,10 +147,10 @@
 import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
 import LoadingScreen from "@/components/general/loading/LoadingScreen.vue";
 
-import IUserData from "@/interfaces/IUserData";
+// import IUserData from "@/interfaces/IUserData";
 import UserService from "@/services/UserService";
 import CacheManager from "@/utils/CacheManager";
-import { ref, computed, onMounted, reactive } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { useRouter } from "vue-router";
 import SendNotification from "@/utils/SendNotification";
 import PostService from "@/services/PostService";
@@ -371,6 +371,7 @@ function handleInitPostClick() {
 
       .content__description {
         width: 100%;
+        max-width: 450px;
 
         .span {
           font-size: 14px;

@@ -13,12 +13,12 @@
       <div class="content__option-column">
         <img
           :src="
-            inputData.profilePhoto
+            inputData?.profilePhoto
               ? profilePhotoURL
               : require('@/assets/imgs/default-avatar.png')
           "
         />
-        <span class="option-row__data">{{ inputData.username }}</span>
+        <span class="option-row__data">{{ inputData?.username }}</span>
 
         <div class="content__option-row --flex">
           <div>
@@ -84,11 +84,11 @@ const emit = defineEmits(["update"]);
 const props = defineProps<Props>();
 
 onMounted(() => {
-  inputData.id = props.userData._id;
-  inputData.name = props.userData.name;
-  inputData.username = props.userData.username;
-  inputData.description = props.userData.description;
-  inputData.profilePhoto = props.userData.profilePhoto;
+  inputData.id = props.userData?._id;
+  inputData.name = props.userData?.name;
+  inputData.username = props.userData?.username;
+  inputData.description = props.userData?.description;
+  inputData.profilePhoto = props.userData?.profilePhoto;
 });
 
 const saveImageIsLoading = ref(false);

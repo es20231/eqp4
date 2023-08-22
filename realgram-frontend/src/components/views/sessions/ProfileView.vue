@@ -319,8 +319,8 @@ async function fetchUserData() {
     gap: 25px;
 
     .header__user-image {
-      min-width: 150px;
-      height: 150px;
+      width: 180px;
+      height: 180px;
 
       border-radius: 50%;
       padding: 2px;
