@@ -2,6 +2,22 @@
 
 * {
   font-family: "Roboto", sans-serif !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #888 #f5f5f5 !important;
+
+  &::-webkit-scrollbar {
+    width: 6px !important;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #888 !important;
+    border-radius: 3px !important;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #f5f5f5 !important;
+    border-radius: 3px !important;
+  }
 }
 
 :where(.css-dev-only-do-not-override-17aj3u5).ant-notification-notice {

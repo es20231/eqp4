@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const requireLogin = require("../middleware/requireLogin");
 const Post = mongoose.model("Post");
+const User = mongoose.model("User");
 const multer = require("multer");
 
 // Configurando o armazenamento do multer para postagem(linha 42)
@@ -132,13 +133,24 @@ router.put("/post/like", requireLogin, async (req, res) => {
     }
 
     const updatedPost = await post.save();
-    res.json(updatedPost);
+
+    // Encontre os detalhes dos usuários que deram like e dislike
+    const populatedLikes = await User.find({ _id: { $in: updatedPost.likes } });
+    const populatedDislikes = await User.find({
+      _id: { $in: updatedPost.dislikes },
+    });
+
+    res.json({
+      ...updatedPost.toObject(),
+      likes: populatedLikes,
+      dislikes: populatedDislikes,
+    });
   } catch (err) {
     return res.status(422).json({ error: err.message });
   }
 });
 
-//Versão atualizada do dislike
+// Versão atualizada do dislike
 router.put("/post/dislike", requireLogin, async (req, res) => {
   const postId = req.body.postId;
   const userId = req.user._id;
@@ -171,7 +183,18 @@ router.put("/post/dislike", requireLogin, async (req, res) => {
     }
 
     const updatedPost = await post.save();
-    res.json(updatedPost);
+
+    // Encontre os detalhes dos usuários que deram like e dislike
+    const populatedLikes = await User.find({ _id: { $in: updatedPost.likes } });
+    const populatedDislikes = await User.find({
+      _id: { $in: updatedPost.dislikes },
+    });
+
+    res.json({
+      ...updatedPost.toObject(),
+      likes: populatedLikes,
+      dislikes: populatedDislikes,
+    });
   } catch (err) {
     return res.status(422).json({ error: err.message });
   }

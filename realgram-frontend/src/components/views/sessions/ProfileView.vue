@@ -13,7 +13,7 @@
       v-model:open="editUserModal.visible"
     />
     <ShowUserFollowersModal
-      :username="followersModal.username"
+      :user="followersModal.user"
       v-if="followersModal.visible"
       @close="followersModal.close()"
       @cancel="followersModal.close()"
@@ -21,7 +21,7 @@
       v-model:open="followersModal.visible"
     />
     <ShowUserFollowingModal
-      :username="followingModal.username"
+      :user="followersModal.user"
       v-if="followingModal.visible"
       @close="followingModal.close()"
       @cancel="followingModal.close()"
@@ -69,13 +69,13 @@
             </span>
             <span
               class="content__pub-counter --pointer"
-              @click="followersModal.open(userData?.username)"
+              @click="followersModal.open(userData)"
             >
               {{ `${userData?.followers?.length} seguidores` }}
             </span>
             <span
               class="content__pub-counter --pointer"
-              @click="followingModal.open(userData?.username)"
+              @click="followingModal.open(userData)"
             >
               {{ `${userData?.following?.length} seguindo` }}
             </span>
@@ -142,11 +142,11 @@ onMounted(async () => {
   }
 });
 
-const userData = ref<any>();
 const userIsLoading = ref(true);
 const followIsLoading = ref(false);
 const activeTab = ref<string>("library-tab");
 const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
+const userData = ref<IUserData>(CacheManager.get("__user"));
 
 const authUser = computed((): IUserData => {
   return CacheManager.get("__user");
@@ -157,22 +157,21 @@ const isAuthProfile = computed((): boolean => {
 const authFollowThisUser = computed(() => {
   let follow = false;
 
-  userData.value?.followers?.forEach((follower: string) => {
-    if (follower == authUser.value._id) follow = true;
+  userData.value?.followers?.forEach((follower) => {
+    if (follower._id == authUser.value._id) follow = true;
   });
 
   return follow;
 });
 
 const followersModal = reactive({
-  username: "",
+  user: userData,
   visible: false,
-  open: (username: string) => {
+  open: (user: IUserData) => {
+    followersModal.user = user;
     followersModal.visible = true;
-    followersModal.username = username;
   },
   close: () => {
-    followersModal.username = "";
     followersModal.visible = false;
   },
   update: () => {
@@ -181,14 +180,13 @@ const followersModal = reactive({
   },
 });
 const followingModal = reactive({
-  username: "",
+  user: userData,
   visible: false,
-  open: (username: string) => {
+  open: (user: IUserData) => {
+    followingModal.user = user;
     followingModal.visible = true;
-    followingModal.username = username;
   },
   close: () => {
-    followingModal.username = "";
     followingModal.visible = false;
   },
   update: () => {
@@ -227,7 +225,7 @@ function handleFollowClick() {
 async function followUser() {
   followIsLoading.value = true;
 
-  const userID = userData.value._id;
+  const userID = userData?.value._id;
   await UserService.followUser(userID)
     .then((response) => {
       console.log("Follow User", response);
