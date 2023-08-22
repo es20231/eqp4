@@ -3,7 +3,7 @@ import IUserData from "./IUserData";
 export default interface IPostComment {
   _id: string;
   text: string;
-  user: IUserData;
+  postedBy: IUserData;
   createdAt: string;
   updatedAt: string;
 }
