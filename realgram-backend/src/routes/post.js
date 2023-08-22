@@ -177,29 +177,40 @@ router.put("/post/dislike", requireLogin, async (req, res) => {
   }
 });
 
-router.put("/post/comment", requireLogin, (req, res) => {
+router.put("/post/comment", requireLogin, async (req, res) => {
   const comentario = {
     text: req.body.text,
     postedBy: req.user._id,
   };
-  Post.findByIdAndUpdate(
-    req.body.postId,
-    {
-      $push: { comentarios: comentario },
-    },
-    {
-      new: true,
-    }
-  )
-    .populate("comentarios.postedBy", "_id name")
-    .populate("postedBy", "_id name")
-    .exec((err, result) => {
-      if (err) {
-        return res.status(422).json({ error: err });
-      } else {
-        res.json(result);
+
+  try {
+    const updatedPost = await Post.findByIdAndUpdate(
+      req.body.postId,
+      {
+        $push: { comentarios: comentario },
+      },
+      {
+        new: true,
       }
-    });
+    )
+      .populate({
+        path: "comentarios.postedBy",
+        select: "_id name library posts email username followers following",
+      })
+      .populate("postedBy", "_id name email username followers following")
+      .exec();
+
+    if (!updatedPost) {
+      return res.status(404).json({ error: "Post não encontrado." });
+    }
+
+    res.json(updatedPost);
+  } catch (error) {
+    console.error("Erro ao atualizar o post:", error);
+    res.status(500).json({ error: "Erro ao atualizar o post." });
+  }
 });
+
+
 
 module.exports = router;
