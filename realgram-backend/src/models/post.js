@@ -13,16 +13,17 @@ const postSchemma = new mongoose.Schema({
     type: String,
     default: 'no photo',
   },
-  likes:[{type:ObjectId,ref:"User"}],
-  dislikes:[{type:ObjectId,ref:"User"}],
-  comentarios:[{
-    text:String,
-    postedBy:{type:ObjectId,ref:"User"}
+  likes: [{ type: ObjectId, ref: "User" }],
+  dislikes: [{ type: ObjectId, ref: "User" }],
+  comentarios: [{
+    text: String,
+    postedBy: { type: ObjectId, ref: "User" }
   }],
+  library: [{ type: ObjectId, ref: "Library" }],
   postedBy: {
     type: ObjectId,
     ref: 'User',
   },
-},{timestamps:true})
+}, { timestamps: true })
 
 mongoose.model('Post', postSchemma)

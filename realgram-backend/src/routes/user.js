@@ -249,4 +249,49 @@ router.put("/user/unfollow", requireLogin, async (req, res) => {
   }
 });
 
+//recebe um username e retorna a lista de usuários que seguem esse username
+router.get('/user/get-followers-by-username/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Encontre o usuário com o username fornecido
+    const user = await User.findOne({ username })
+      .populate('followers', '-password') // Popule os seguidores, excluindo a senha
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    // Retorne os dados do usuário e seus seguidores
+    res.json({
+      followers: user.followers,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro no servidor' });
+  }
+});
+
+//recebe um username e retorna a lista de usuários que o usuário está seguindo
+router.get('/user/get-following-by-username/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Encontre o usuário com o username fornecido
+    const user = await User.findOne({ username })
+      .populate('following', '-password') // Popule os usuários que está seguindo, excluindo a senha
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    // Retorne os dados do usuário e quem ele está seguindo
+    res.json({
+      following: user.following,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro no servidor' });
+  }
+});
+
 module.exports = router;
