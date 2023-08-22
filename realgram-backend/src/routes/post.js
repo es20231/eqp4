@@ -252,4 +252,34 @@ router.put("/post/comment", requireLogin, async (req, res) => {
   }
 });
 
+router.delete("/post/comment/:postId/:commentId", requireLogin, async (req, res) => {
+  const postId = req.params.postId;
+  const commentId = req.params.commentId;
+
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ error: "Post não encontrado." });
+    }
+
+    const comment = post.comentarios.find(comment => comment._id.toString() === commentId);
+    if (!comment) {
+      return res.status(404).json({ error: "Comentário não encontrado." });
+    }
+
+    if (comment.postedBy.toString() !== req.user._id.toString() && post.postedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: "Não autorizado a deletar este comentário." });
+    }
+
+    post.comentarios.pull(commentId);
+    await post.save();
+
+    res.json({ message: "Comentário deletado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao deletar o comentário:", error);
+    res.status(500).json({ error: "Erro ao deletar o comentário." });
+  }
+});
+
+
 module.exports = router;
