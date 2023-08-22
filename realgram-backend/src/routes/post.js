@@ -36,17 +36,33 @@ router.get("/post/get-all", (req, res) => {
     });
 });
 
-router.get("/post/get-timeline", requireLogin, (req, res) => {
-  //Se postado por seguindo
-  Post.find({ postedBy: { $in: req.user.following } })
-    .populate("postedBy", "_id name")
-    .sort("-createdAt")
-    .then((posts) => {
-      res.json({ posts });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+router.get("/post/get-timeline", requireLogin, async (req, res) => {
+  try {
+    const posts = await Post.find({ postedBy: { $in: req.user.following } })
+      .populate({
+        path: "postedBy",
+        select: "-password", // Exclua o campo 'password'
+      })
+      .populate({
+        path: "likes dislikes",
+        select: "-password", // Exclua o campo 'password' dos usuários que deram likes/dislikes
+      })
+      .populate({
+        path: "comentarios",
+        populate: {
+          path: "postedBy",
+          select: "-password", // Exclua o campo 'password' dos usuários que postaram os comentários
+        },
+      })
+      .sort("-createdAt");
+
+    res.json(posts);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ error: "Erro ao buscar as postagens da linha do tempo." });
+  }
 });
 
 router.post(

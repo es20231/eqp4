@@ -1,6 +1,9 @@
 import axiosInstance from "./AxiosInstance";
 
 export default {
+  getTimeline: () => {
+    return axiosInstance.get("/post/get-timeline");
+  },
   saveImageInLibrary: (file: File, body: string) => {
     const formData = new FormData();
     formData.append("image", file);
