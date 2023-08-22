@@ -271,18 +271,22 @@ async function handleSentComment() {
         }
       }
     }
+  }
+}
+</style>
 
-    .footer__send-comment {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      justify-content: flex-end;
+<style lang="scss">
+.posts-comments-modal {
+  .footer__send-comment {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
 
-      gap: 10px;
-      padding-top: 15px;
-      margin-top: 10px;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-    }
+    gap: 10px;
+    padding-top: 15px;
+    margin-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
   }
 }
 </style>
