@@ -85,6 +85,14 @@
               name="ri-chat-1-line"
               @click="postCommentModal.open(postData)"
             ></DefaultIcon>
+            <DefaultIcon
+              pointer
+              size="20px"
+              color="red"
+              name="ri-delete-bin-2-line"
+              class="buttons__right-side"
+              @click="confirmDeleteModal()"
+            ></DefaultIcon>
           </div>
 
           <div class="footer__iterations">
@@ -131,6 +139,7 @@ import SendNotification from "@/utils/SendNotification";
 import CacheManager from "@/utils/CacheManager";
 import PostCommentsModal from "./PostCommentsModal.vue";
 import PostInterationsModal from "./PostInterationsModal.vue";
+import { Modal } from "ant-design-vue";
 
 interface Props {
   user: IUserData;
@@ -187,6 +196,24 @@ const postInterationsModal = reactive({
     postInterationsModal.visible = false;
   },
 });
+
+function confirmDeleteModal() {
+  Modal.confirm({
+    centered: true,
+    title: "Você tem certeza?",
+    content: "Uma postagem apagada não poderá ser recuperada.",
+    async onOk() {
+      SendNotification("info", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Em construção...",
+      });
+    },
+    onCancel() {
+      console.log("close confirm delete modal");
+    },
+  });
+}
 
 function fillPostData(post: IUserPost) {
   console.log("Fill Post Data", post);
@@ -409,6 +436,10 @@ async function handleSentComment() {
           align-items: center;
           justify-content: flex-start;
           gap: 10px;
+
+          .buttons__right-side {
+            margin-left: auto;
+          }
         }
 
         .footer__iterations {
