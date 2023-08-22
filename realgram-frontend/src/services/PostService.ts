@@ -29,4 +29,7 @@ export default {
       postId,
     });
   },
+  deleteComment: (commentId: string, postId: string) => {
+    return axiosInstance.delete(`/post/comment/${postId}/${commentId}`);
+  },
 };

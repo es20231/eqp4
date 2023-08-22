@@ -232,41 +232,78 @@ router.put("/post/comment", requireLogin, async (req, res) => {
       return res.status(404).json({ error: "Post não encontrado." });
     }
 
-    res.json(updatedPost);
+    const populatedComentarios = updatedPost.comentarios.map((comentario) => {
+      const comentarioUser = comentario.postedBy;
+      return {
+        ...comentario.toObject(),
+        postedBy: comentarioUser,
+      };
+    });
+
+    const updatedPostWithPopulatedComentarios = {
+      ...updatedPost.toObject(),
+      comentarios: populatedComentarios,
+    };
+
+    res.json(updatedPostWithPopulatedComentarios);
   } catch (error) {
     console.error("Erro ao atualizar o post:", error);
     res.status(500).json({ error: "Erro ao atualizar o post." });
   }
 });
 
-router.delete("/post/comment/:postId/:commentId", requireLogin, async (req, res) => {
-  const postId = req.params.postId;
-  const commentId = req.params.commentId;
+router.delete(
+  "/post/comment/:postId/:commentId",
+  requireLogin,
+  async (req, res) => {
+    const postId = req.params.postId;
+    const commentId = req.params.commentId;
 
-  try {
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({ error: "Post não encontrado." });
+    try {
+      const post = await Post.findById(postId);
+      if (!post) {
+        return res.status(404).json({ error: "Post não encontrado." });
+      }
+
+      const comment = post.comentarios.find(
+        (comment) => comment._id.toString() === commentId
+      );
+      if (!comment) {
+        return res.status(404).json({ error: "Comentário não encontrado." });
+      }
+
+      if (
+        comment.postedBy.toString() !== req.user._id.toString() &&
+        post.postedBy.toString() !== req.user._id.toString()
+      ) {
+        return res
+          .status(403)
+          .json({ error: "Não autorizado a deletar este comentário." });
+      }
+
+      post.comentarios.pull(commentId);
+      await post.save();
+
+      // Popule os detalhes dos usuários que postaram os comentários
+      const populatedComentarios = await Promise.all(
+        post.comentarios.map(async (comentario) => {
+          const comentarioUser = await User.findById(
+            comentario.postedBy,
+            "_id name library posts profilePhoto email username followers following"
+          );
+          return {
+            ...comentario.toObject(),
+            postedBy: comentarioUser,
+          };
+        })
+      );
+
+      res.json(populatedComentarios);
+    } catch (error) {
+      console.error("Erro ao deletar o comentário:", error);
+      res.status(500).json({ error: "Erro ao deletar o comentário." });
     }
-
-    const comment = post.comentarios.find(comment => comment._id.toString() === commentId);
-    if (!comment) {
-      return res.status(404).json({ error: "Comentário não encontrado." });
-    }
-
-    if (comment.postedBy.toString() !== req.user._id.toString() && post.postedBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: "Não autorizado a deletar este comentário." });
-    }
-
-    post.comentarios.pull(commentId);
-    await post.save();
-
-    res.json({ message: "Comentário deletado com sucesso." });
-  } catch (error) {
-    console.error("Erro ao deletar o comentário:", error);
-    res.status(500).json({ error: "Erro ao deletar o comentário." });
   }
-});
-
+);
 
 module.exports = router;

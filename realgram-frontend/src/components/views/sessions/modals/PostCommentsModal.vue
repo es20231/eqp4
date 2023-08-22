@@ -7,14 +7,14 @@
     class="posts-comments-modal"
   >
     <div class="comment-list-container">
-      <div class="content__no-item" v-if="commentList.length == 0">
+      <div class="content__no-item" v-if="commentList?.length == 0">
         <span>Sem comentários na postagem.</span>
       </div>
 
       <template :key="comment._id" v-for="comment in commentList">
         <div class="content__message">
           <a-avatar
-            :size="38"
+            :size="45"
             :src="
               comment.postedBy.profilePhoto
                 ? apiRootURL + '/uploads/' + comment.postedBy.profilePhoto
@@ -29,17 +29,19 @@
             </span>
 
             <div class="data__stats">
+              <DefaultIcon
+                pointer
+                size="15px"
+                color="red"
+                name="ri-delete-bin-line"
+                v-if="authUserCanDeleteComment(comment)"
+                @click="confirmDeleteModal(comment)"
+              ></DefaultIcon>
               <span class="stats__time">{{
                 howManyDaysPassed(comment.createdAt)
               }}</span>
             </div>
           </div>
-
-          <DefaultIcon
-            color="ri-eraser-fill"
-            name="ri-delete-line"
-            size="15px"
-          ></DefaultIcon>
         </div>
       </template>
     </div>
@@ -63,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 import DefaultIcon from "@/components/general/icons/DefaultIcon.vue";
 import IUserPost from "@/interfaces/IUserPost";
@@ -73,6 +75,9 @@ import DefaultTextArea from "@/components/general/inputs/DefaultTextArea.vue";
 import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
 import SendNotification from "@/utils/SendNotification";
 import PostService from "@/services/PostService";
+import CacheManager from "@/utils/CacheManager";
+import IUserData from "@/interfaces/IUserData";
+import { Modal } from "ant-design-vue";
 
 interface Props {
   post: IUserPost | null;
@@ -83,20 +88,81 @@ const props = defineProps<Props>();
 const emit = defineEmits(["update"]);
 
 onMounted(() => {
-  fillCommentList(props.post);
+  fillCommentList(props.post?.comentarios);
 });
 
 // const router = useRouter();
 const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
 const commentList = ref<IPostComment[]>([]);
 const commentIsLoading = ref<boolean>(false);
+const deleteIsLoading = ref<boolean>(false);
 const inputComment = ref<string>("");
+const commentToDelete = ref<any>();
 
-function fillCommentList(post: IUserPost | null) {
-  console.log("Fill Comment List", post);
+const authUser = computed((): IUserData => {
+  return CacheManager.get("__user");
+});
 
-  if (post == null) return;
-  commentList.value = post.comentarios;
+function authUserCanDeleteComment(comment: any) {
+  return (
+    comment._id == authUser.value._id ||
+    props.post?.postedBy._id == authUser.value._id
+  );
+}
+
+function confirmDeleteModal(comment: any) {
+  commentToDelete.value = comment;
+  Modal.confirm({
+    centered: true,
+    title: "Você tem certeza?",
+    content: "Um comentário apagado não poderá ser recuperado.",
+    async onOk() {
+      await handleDeleteCommentClick(commentToDelete.value);
+    },
+    onCancel() {
+      console.log("close confirm delete modal");
+    },
+  });
+}
+
+async function handleDeleteCommentClick(comment: any) {
+  console.log("Handle Delete Comment Click: ", comment);
+
+  deleteIsLoading.value = true;
+
+  await PostService.deleteComment(comment._id, `${props.post?._id}`)
+    .then((response) => {
+      console.log("Delete Comment Post", response);
+
+      emit("update");
+      inputComment.value = "";
+      fillCommentList(response.data);
+
+      SendNotification("success", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Comentário removido da postagem com sucesso!",
+      });
+    })
+    .catch((error) => {
+      console.log("Delete Comment Post Error", error);
+
+      SendNotification("error", {
+        duration: 3,
+        placement: "bottomRight",
+        message:
+          "Erro interno ao remover comentário da postagem, tente novamente",
+      });
+    });
+
+  deleteIsLoading.value = false;
+}
+
+function fillCommentList(list: any) {
+  console.log("Fill Comment List", list);
+
+  if (list == null) return;
+  commentList.value = list;
 }
 
 async function handleSentComment() {
@@ -122,7 +188,7 @@ async function handleSentComment() {
 
       emit("update");
       inputComment.value = "";
-      fillCommentList(response.data);
+      fillCommentList(response.data.comentarios);
 
       SendNotification("success", {
         duration: 3,
@@ -136,7 +202,7 @@ async function handleSentComment() {
       SendNotification("error", {
         duration: 3,
         placement: "bottomRight",
-        message: "Erro interno ao dar dislike na postagem, tente novamente",
+        message: "Erro interno ao realizar comentário, tente novamente",
       });
     });
 
@@ -191,10 +257,14 @@ async function handleSentComment() {
         }
 
         .data__comment {
-          font-size: 12px;
+          font-size: 14px;
         }
 
         .data__stats {
+          display: flex;
+          align-items: flex-end;
+          gap: 5px;
+
           margin-left: auto;
           font-size: 12px;
           color: $data-info-color;
