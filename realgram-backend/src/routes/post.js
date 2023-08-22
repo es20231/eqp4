@@ -204,6 +204,7 @@ router.put("/post/comment", requireLogin, async (req, res) => {
   const comentario = {
     text: req.body.text,
     postedBy: req.user._id,
+    createdAt: new Date(),
   };
 
   try {
@@ -218,9 +219,13 @@ router.put("/post/comment", requireLogin, async (req, res) => {
     )
       .populate({
         path: "comentarios.postedBy",
-        select: "_id name library posts email username followers following",
+        select:
+          "_id name library posts profilePhoto email username followers following",
       })
-      .populate("postedBy", "_id name email username followers following")
+      .populate(
+        "postedBy",
+        "_id name email profilePhoto username followers following"
+      )
       .exec();
 
     if (!updatedPost) {
@@ -233,7 +238,5 @@ router.put("/post/comment", requireLogin, async (req, res) => {
     res.status(500).json({ error: "Erro ao atualizar o post." });
   }
 });
-
-
 
 module.exports = router;

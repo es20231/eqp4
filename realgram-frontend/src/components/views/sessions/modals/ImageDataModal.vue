@@ -104,7 +104,11 @@
               v-model="inputComment"
               placeholder="Escreva um comentário..."
             ></DefaultTextArea>
-            <DefaultButton @click="handleSentComment">Comentar</DefaultButton>
+            <DefaultButton
+              @click="handleSentComment"
+              :loading="commentIsLoading"
+              >Comentar</DefaultButton
+            >
           </div>
         </div>
       </div>
@@ -143,7 +147,7 @@ onMounted(() => {
 
 const router = useRouter();
 const inputComment = ref<string>("");
-// const commentIsLoading = ref<boolean>(false);
+const commentIsLoading = ref<boolean>(false);
 const likeIsLoading = ref<boolean>(false);
 const dislikeIsLoading = ref<boolean>(false);
 const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
@@ -273,6 +277,47 @@ async function handleDislikeClick() {
 
 async function handleSentComment() {
   console.log("Handle Sent Comment", inputComment.value);
+
+  if (inputComment.value == "") {
+    SendNotification("warning", {
+      duration: 3,
+      placement: "bottomRight",
+      message: "Insira algum comentário.",
+    });
+    return;
+  }
+
+  commentIsLoading.value = true;
+
+  await PostService.sentComment(
+    inputComment.value,
+    props.post ? props.post._id : ""
+  )
+    .then((response) => {
+      console.log("Comment Post", response);
+
+      emit("update");
+      inputComment.value = "";
+      fillPostData(response.data);
+
+      SendNotification("success", {
+        duration: 3,
+        placement: "bottomRight",
+        message:
+          "Comentário realizado com sucesso, clique no botão de comentários para visualiza-lo!",
+      });
+    })
+    .catch((error) => {
+      console.log("Comment Post Error", error);
+
+      SendNotification("error", {
+        duration: 3,
+        placement: "bottomRight",
+        message: "Erro interno ao dar dislike na postagem, tente novamente",
+      });
+    });
+
+  commentIsLoading.value = false;
 }
 </script>
 
@@ -388,6 +433,7 @@ async function handleSentComment() {
 
           gap: 10px;
           padding-top: 15px;
+          margin-top: 10px;
           border-top: 1px solid rgba(0, 0, 0, 0.1);
         }
       }
