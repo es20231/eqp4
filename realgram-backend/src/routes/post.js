@@ -232,7 +232,20 @@ router.put("/post/comment", requireLogin, async (req, res) => {
       return res.status(404).json({ error: "Post não encontrado." });
     }
 
-    res.json(updatedPost);
+    const populatedComentarios = updatedPost.comentarios.map((comentario) => {
+      const comentarioUser = comentario.postedBy;
+      return {
+        ...comentario.toObject(),
+        postedBy: comentarioUser,
+      };
+    });
+
+    const updatedPostWithPopulatedComentarios = {
+      ...updatedPost.toObject(),
+      comentarios: populatedComentarios,
+    };
+
+    res.json(updatedPostWithPopulatedComentarios);
   } catch (error) {
     console.error("Erro ao atualizar o post:", error);
     res.status(500).json({ error: "Erro ao atualizar o post." });
