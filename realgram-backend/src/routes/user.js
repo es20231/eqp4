@@ -47,16 +47,53 @@ router.get(
         return res.status(404).json({ error: "Usuário não encontrado." });
       }
 
-      // Encontrar os posts do usuário usando a função populate
+      // Encontrar os posts do usuário
       const posts = await Post.find({ postedBy: user._id });
 
-      // Encontrar a library do usuário usando a função populate
+      // Mapear os IDs dos usuários associados aos posts
+      const userIds = posts.map((post) => post.postedBy);
+
+      // Encontrar os detalhes dos usuários associados aos posts
+      const users = await User.find({ _id: { $in: userIds } });
+
+      // Mapear os posts para incluir os detalhes do usuário associado
+      const populatedPosts = posts.map((post) => {
+        const postUser = users.find(
+          (u) => u._id.toString() === post.postedBy.toString()
+        );
+
+        // Encontrar os detalhes dos usuários que deram likes e dislikes
+        const populatedLikes = post.likes.map((likeId) =>
+          users.find((u) => u._id.toString() === likeId.toString())
+        );
+
+        const populatedDislikes = post.dislikes.map((dislikeId) =>
+          users.find((u) => u._id.toString() === dislikeId.toString())
+        );
+
+        return {
+          ...post.toObject(),
+          postedBy: postUser,
+          likes: populatedLikes,
+          dislikes: populatedDislikes,
+        };
+      });
+
+      // Preencher detalhes dos seguidores
+      const followers = await User.find({ _id: { $in: user.followers } });
+
+      // Preencher detalhes dos seguidos
+      const following = await User.find({ _id: { $in: user.following } });
+
+      // Encontrar a library do usuário
       const library = await Library.find({ uploadedBy: user._id });
 
-      // Retornar o usuário com os posts como atributo
+      // Retornar o usuário com os posts e detalhes de followers/following
       res.json({
-        ...user._doc,
-        posts,
+        ...user.toObject(),
+        posts: populatedPosts,
+        followers,
+        following,
         library,
       });
     } catch (err) {

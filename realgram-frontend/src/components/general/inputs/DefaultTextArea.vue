@@ -7,7 +7,7 @@
       size="large"
       :value="modelValue"
       @change="emitChange"
-      :bordered="bordeless"
+      :bordered="!bordeless"
       :maxlength="maxLength"
       :placeholder="placeholder"
       :autoSize="{ minRows, maxRows }"
@@ -49,6 +49,7 @@ withDefaults(defineProps<Props>(), {
   placeholder: "",
   maxLength: 300,
   height: 150,
+  bordeless: false,
   minRows: 2,
   maxRows: 5,
 });

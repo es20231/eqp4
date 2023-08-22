@@ -6,6 +6,23 @@
     title="Detalhes da publicação"
     class="image-options-modal"
   >
+    <!-- Modals -->
+    <PostCommentsModal
+      :post="postCommentModal.post"
+      v-if="postCommentModal.visible"
+      @close="postCommentModal.close()"
+      @cancel="postCommentModal.close()"
+      v-model:open="postCommentModal.visible"
+    />
+    <PostInterationsModal
+      :post="postInterationsModal.post"
+      v-if="postInterationsModal.visible"
+      @close="postInterationsModal.close()"
+      @cancel="postInterationsModal.close()"
+      v-model:open="postInterationsModal.visible"
+    />
+
+    <!-- Content -->
     <div class="modal__content">
       <div class="content__image">
         <img
@@ -44,7 +61,7 @@
               pointer
               size="20px"
               :name="
-                postData?.likes.includes(authUser._id)
+                postData?.likes.map((like) => like._id).includes(authUser._id)
                   ? 'ri-thumb-up-fill'
                   : 'ri-thumb-up-line'
               "
@@ -54,7 +71,9 @@
               pointer
               size="20px"
               :name="
-                postData?.dislikes.includes(authUser._id)
+                postData?.dislikes
+                  .map((dislike) => dislike._id)
+                  .includes(authUser._id)
                   ? 'ri-thumb-down-fill'
                   : 'ri-thumb-down-line'
               "
@@ -64,12 +83,12 @@
               pointer
               size="20px"
               name="ri-chat-1-line"
-              @click="handleCommentsClick"
+              @click="postCommentModal.open(postData)"
             ></DefaultIcon>
           </div>
 
           <div class="footer__iterations">
-            <span @click="handleOpenIterations">{{
+            <span @click="postInterationsModal.open(postData)">{{
               `${iterationsCounter} ${
                 iterationsCounter == 1 ? "interação" : "interações"
               } com a postagem`
@@ -106,6 +125,8 @@ import DefaultTextArea from "@/components/general/inputs/DefaultTextArea.vue";
 import PostService from "@/services/PostService";
 import SendNotification from "@/utils/SendNotification";
 import CacheManager from "@/utils/CacheManager";
+import PostCommentsModal from "./PostCommentsModal.vue";
+import PostInterationsModal from "./PostInterationsModal.vue";
 
 interface Props {
   user: IUserData;
@@ -122,7 +143,7 @@ onMounted(() => {
 
 const router = useRouter();
 const inputComment = ref<string>("");
-const commentIsLoading = ref<boolean>(false);
+// const commentIsLoading = ref<boolean>(false);
 const likeIsLoading = ref<boolean>(false);
 const dislikeIsLoading = ref<boolean>(false);
 const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
@@ -134,9 +155,33 @@ const postData = reactive<IUserPost>({
   likes: [],
   dislikes: [],
   comentarios: [],
-  postedBy: "",
+  postedBy: props.user,
   createdAt: "",
   updatedAt: "",
+});
+const postCommentModal = reactive({
+  visible: false,
+  post: null,
+  open: (post: any) => {
+    postCommentModal.post = post;
+    postCommentModal.visible = true;
+  },
+  close: () => {
+    postCommentModal.post = null;
+    postCommentModal.visible = false;
+  },
+});
+const postInterationsModal = reactive({
+  visible: false,
+  post: null,
+  open: (post: any) => {
+    postInterationsModal.post = post;
+    postInterationsModal.visible = true;
+  },
+  close: () => {
+    postInterationsModal.post = null;
+    postInterationsModal.visible = false;
+  },
 });
 
 function fillPostData(post: IUserPost) {
@@ -151,6 +196,7 @@ function fillPostData(post: IUserPost) {
   postData.dislikes = post.dislikes;
   postData.comentarios = post.comentarios;
   postData.postedBy = post.postedBy;
+  postData.createdAt = post.createdAt;
   postData.updatedAt = post.updatedAt;
 }
 
@@ -225,14 +271,6 @@ async function handleDislikeClick() {
   dislikeIsLoading.value = false;
 }
 
-async function handleCommentsClick() {
-  console.log("Handle Comments Click");
-}
-
-async function handleOpenIterations() {
-  console.log("Handle Open Iterations");
-}
-
 async function handleSentComment() {
   console.log("Handle Sent Comment", inputComment.value);
 }
@@ -280,7 +318,11 @@ async function handleSentComment() {
         gap: 10px;
 
         span {
-          cursor: pointer;
+          &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+          }
+
           font-size: 14px;
           font-weight: 600;
         }

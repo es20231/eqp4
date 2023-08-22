@@ -1,7 +1,7 @@
 <template>
   <a-modal
     size="large"
-    :width="300"
+    :width="350"
     title="Seguidores"
     class="show-user-followers-modal"
     :footer="false"
@@ -22,31 +22,36 @@
       <div class="containe__user-list" v-else>
         <!-- Item -->
         <template :key="user._id" v-for="user in filteredList">
-          <div class="user-list__item" @click="handleUserClick(user)">
+          <div class="user-list__item">
             <a-avatar
               :size="38"
               :src="
                 user.profilePhoto
-                  ? user.profilePhoto
+                  ? apiRootURL + '/uploads/' + user.profilePhoto
                   : require('@/assets/imgs/default-avatar.png')
               "
             />
 
-            <div class="item__data">
-              <span class="data__title">{{ user.username }}</span>
-              <span class="data__subtitle">{{ user.name }}</span>
-            </div>
+            <span class="data__title" @click="handleUserClick(user)">{{
+              user.username
+            }}</span>
 
-            <div class="item__btn">
+            <!-- <div class="item__btn">
               <DefaultButton
                 :loading="followIsLoading"
                 @click="handleFollowClick(user)"
-                :type="authUserFollowThisUser(user) ? 'default' : 'primary'"
+                :type="
+                  authUser.following.map((user) => user._id).includes(user._id)
+                    ? 'default'
+                    : 'primary'
+                "
                 >{{
-                  authUserFollowThisUser(user) ? "Seguindo" : "Seguir"
+                  authUser.following.map((user) => user._id).includes(user._id)
+                    ? "Seguindo"
+                    : "Seguir"
                 }}</DefaultButton
               >
-            </div>
+            </div> -->
           </div>
         </template>
       </div>
@@ -57,15 +62,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import IUserData from "@/interfaces/IUserData";
-import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
+// import DefaultButton from "@/components/general/buttons/DefaultButton.vue";
 import DefaultInput from "@/components/general/inputs/DefaultInput.vue";
-import CacheManager from "@/utils/CacheManager";
-import UserService from "@/services/UserService";
-import SendNotification from "@/utils/SendNotification";
+// import CacheManager from "@/utils/CacheManager";
 import { useRouter } from "vue-router";
 
 interface Props {
-  username: string;
+  user: IUserData | null;
 }
 
 const props = defineProps<Props>();
@@ -73,18 +76,18 @@ const props = defineProps<Props>();
 const emit = defineEmits(["close"]);
 
 onMounted(() => {
-  fetchUserFollowers();
+  if (props.user) fillFollowersList(props.user.followers);
 });
 
 const router = useRouter();
 const inputFilter = ref<string>("");
 const followersList = ref<IUserData[]>([]);
-const listIsLoading = ref<boolean>(false);
-const followIsLoading = ref<boolean>(false);
+// const followIsLoading = ref<boolean>(false);
+const apiRootURL = ref(process.env.VUE_APP_API_ROOT);
 
-const authUser = computed((): IUserData => {
-  return CacheManager.get("__user");
-});
+// const authUser = computed((): IUserData => {
+//   return CacheManager.get("__user");
+// });
 const filteredList = computed(() => {
   return followersList.value.filter(
     (user) =>
@@ -96,6 +99,11 @@ const filteredList = computed(() => {
         .includes(inputFilter.value.toLocaleLowerCase())
   );
 });
+
+function fillFollowersList(list: IUserData[] | null) {
+  if (list == null) return;
+  followersList.value = list;
+}
 
 function handleUserClick(user: IUserData) {
   console.log("Handle User Click", user);
@@ -110,42 +118,9 @@ function handleUserClick(user: IUserData) {
   });
 }
 
-function handleFollowClick(user: IUserData) {
-  console.log("Handle Follow Click", user);
-}
-
-function authUserFollowThisUser(user: IUserData) {
-  let follow = false;
-
-  authUser.value?.followers?.forEach((follower: string) => {
-    if (follower == user._id) follow = true;
-  });
-
-  return follow;
-}
-
-async function fetchUserFollowers() {
-  listIsLoading.value = true;
-
-  await UserService.getUserFollowers(props.username)
-    .then((response) => {
-      console.log("Get User Followers", response);
-
-      followersList.value = response.data;
-    })
-    .catch((error) => {
-      console.log("Get User Followers Error", error);
-
-      SendNotification("error", {
-        duration: 3,
-        placement: "bottomRight",
-        message:
-          "Erro interno ao resgatar lista de seguidores, tente novamente",
-      });
-    });
-
-  listIsLoading.value = false;
-}
+// function handleFollowClick(user: IUserData) {
+//   console.log("Handle Follow Click", user);
+// }
 </script>
 
 <style scoped lang="scss">
@@ -166,64 +141,37 @@ async function fetchUserFollowers() {
       }
     }
     .containe__user-list {
-      max-height: 75vh;
-
-      padding: 0px 16px 0px 8px;
+      width: 100%;
+      max-height: 60vh;
+      padding: 0 10px;
+      margin: 15px 0px;
 
       overflow: auto;
-      scrollbar-width: thin !important;
-      scrollbar-color: #888 #f5f5f5 !important;
-
-      &::-webkit-scrollbar {
-        width: 6px !important;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background-color: #888 !important;
-        border-radius: 3px !important;
-      }
-
-      &::-webkit-scrollbar-track {
-        background-color: #f5f5f5 !important;
-        border-radius: 3px !important;
-      }
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
 
       .user-list__item {
         width: 100%;
-        padding: 6px 8px;
-
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-        border-radius: 10px;
-        &:hover {
-          background-color: #ccc;
-          transform: scale(1.02);
-        }
-
         display: flex;
+        flex-direction: row;
         align-items: center;
         justify-content: flex-start;
+        gap: 15px;
 
-        gap: 10px;
-        margin-bottom: 10px;
+        span {
+          font-size: 14px;
+          font-weight: 600;
+          max-width: 180px;
 
-        .item__data {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 3px;
-
-          .data__title {
-            font-size: 14px;
-            font-weight: 600;
+          &:hover {
+            cursor: pointer;
+            text-decoration: underline;
           }
+        }
 
-          .data__subtitle {
-            font-size: 15px;
-            font-weight: 500;
-
-            color: $placeholder-color;
-          }
+        .item__btn {
+          margin-left: auto;
         }
       }
     }
