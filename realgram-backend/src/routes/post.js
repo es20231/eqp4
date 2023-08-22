@@ -115,6 +115,29 @@ router.get("/post/get-current-user-posts", requireLogin, (req, res) => {
     });
 });
 
+router.delete("/post/delete/:postId", requireLogin, async (req, res) => {
+  const postId = req.params.postId;
+
+  try {
+    const postToDelete = await Post.findOne({ _id: postId, postedBy: req.user._id });
+
+    if (!postToDelete) {
+      return res.status(404).json({ error: "Postagem não encontrada ou você não tem permissão para deletar." });
+    }
+
+    if (postToDelete.postedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: "Você não tem permissão para deletar esta postagem." });
+    }
+
+    const deletedPost = await Post.findByIdAndDelete(postId);
+
+    res.json({ message: "Postagem deletada com sucesso" });
+  } catch (error) {
+    console.error("Erro ao deletar postagem:", error);
+    res.status(500).json({ error: "Erro ao deletar a postagem" });
+  }
+});
+
 //versão atualizada do like
 router.put("/post/like", requireLogin, async (req, res) => {
   const postId = req.body.postId;
