@@ -14,6 +14,7 @@ const postSchema = new mongoose.Schema(
       type: String,
       default: "no photo",
     },
+    library: [{ type: ObjectId, ref: "Library" }],
     likes: [{ type: ObjectId, ref: "User" }],
     dislikes: [{ type: ObjectId, ref: "User" }],
     comentarios: [
@@ -26,9 +27,9 @@ const postSchema = new mongoose.Schema(
     postedBy: {
       type: ObjectId,
       ref: "User",
+
     },
   },
-  { timestamps: true }
-);
+  { timestamps: true })
 
 mongoose.model("Post", postSchema);
