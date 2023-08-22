@@ -1,18 +1,22 @@
 import moment from "moment";
 
 export default (UTCStringDate: string) => {
-  if (UTCStringDate == "") {
-    return "-";
+  if (UTCStringDate == "" || UTCStringDate == undefined) {
+    return "tesada-";
   }
 
   let friendlyDateString = "";
   const argDate = moment(UTCStringDate);
   const today = moment();
   const dateAndTodayDiferrence = today.diff(argDate, "hours");
+  const dateAndTodayMinDiferrence = today.diff(argDate, "minutes");
   const argDateString = argDate.format("DD/MM/YYYY");
 
   console.log(dateAndTodayDiferrence);
   switch (true) {
+    case dateAndTodayDiferrence == 0 && dateAndTodayMinDiferrence > 1:
+      friendlyDateString = `${dateAndTodayMinDiferrence} min`;
+      break;
     case dateAndTodayDiferrence == 0:
       friendlyDateString = "agora";
       break;

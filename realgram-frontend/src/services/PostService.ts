@@ -23,4 +23,10 @@ export default {
       postId,
     });
   },
+  sentComment: (text: string, postId: string) => {
+    return axiosInstance.put("/post/comment", {
+      text,
+      postId,
+    });
+  },
 };

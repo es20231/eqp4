@@ -41,7 +41,9 @@ router.get(
 
     try {
       // Encontrar o usuário pelo username
-      const user = await User.findOne({ username: username });
+      const user = await User.findOne({ username: username }).select(
+        "-password"
+      );
 
       if (!user) {
         return res.status(404).json({ error: "Usuário não encontrado." });
@@ -50,11 +52,18 @@ router.get(
       // Encontrar os posts do usuário
       const posts = await Post.find({ postedBy: user._id });
 
-      // Mapear os IDs dos usuários associados aos posts
+      // Mapear os IDs dos usuários associados aos comentários e posts
       const userIds = posts.map((post) => post.postedBy);
+      posts.forEach((post) => {
+        post.comentarios.forEach((comentario) => {
+          userIds.push(comentario.postedBy);
+        });
+      });
 
-      // Encontrar os detalhes dos usuários associados aos posts
-      const users = await User.find({ _id: { $in: userIds } });
+      // Encontrar os detalhes dos usuários associados aos comentários e posts
+      const users = await User.find({ _id: { $in: userIds } }).select(
+        "-password"
+      );
 
       // Mapear os posts para incluir os detalhes do usuário associado
       const populatedPosts = posts.map((post) => {
@@ -71,22 +80,40 @@ router.get(
           users.find((u) => u._id.toString() === dislikeId.toString())
         );
 
+        // Popule os detalhes dos usuários associados aos comentários
+        const populatedComentarios = post.comentarios.map((comentario) => {
+          const comentarioUser = users.find(
+            (u) => u._id.toString() === comentario.postedBy.toString()
+          );
+          return {
+            ...comentario.toObject(),
+            postedBy: comentarioUser,
+          };
+        });
+
         return {
           ...post.toObject(),
           postedBy: postUser,
           likes: populatedLikes,
           dislikes: populatedDislikes,
+          comentarios: populatedComentarios,
         };
       });
 
       // Preencher detalhes dos seguidores
-      const followers = await User.find({ _id: { $in: user.followers } });
+      const followers = await User.find({
+        _id: { $in: user.followers },
+      }).select("-password");
 
       // Preencher detalhes dos seguidos
-      const following = await User.find({ _id: { $in: user.following } });
+      const following = await User.find({
+        _id: { $in: user.following },
+      }).select("-password");
 
       // Encontrar a library do usuário
-      const library = await Library.find({ uploadedBy: user._id });
+      const library = await Library.find({ uploadedBy: user._id }).select(
+        "-password"
+      );
 
       // Retornar o usuário com os posts e detalhes de followers/following
       res.json({
