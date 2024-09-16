@@ -25,6 +25,8 @@ const userSchema = new mongoose.Schema({
   profilePhoto: {
     type: String
   },
+  library: [{ type: ObjectId, ref: "Library" }],
+  posts: [{ type: ObjectId, ref: "Post" }],
   followers: [{ type: ObjectId, ref: "User" }],
   following: [{ type: ObjectId, ref: "User" }]
 })
